@@ -22,6 +22,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.2"
   spec.add_development_dependency "cucumber", "~> 1.3"
-  spec.add_development_dependency "guard-cucumber", "~> 1.5"
-  spec.add_development_dependency "byebug", "~> 3.5"
 end
