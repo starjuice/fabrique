@@ -15,10 +15,12 @@ module Fabrique
       true
     end
 
-    # TODO specify acquiring an unknown id
     def acquire(id, properties = nil)
-      registration = find_registration(id)
-      registration.call_constructor(properties)
+      if registration = find_registration(id)
+        registration.call_constructor(properties)
+      else
+        raise ArgumentError, "#{id} not registered in #{@name}"
+      end
     end
 
     private

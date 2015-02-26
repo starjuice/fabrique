@@ -3,10 +3,9 @@ require "spec_helper"
 describe Fabrique::PluginRegistry do
 
   subject { described_class.new("Test Plugin Factory") }
+  let(:constructor) { spy("constructor") }
 
   describe "#register(id, type, constructor)" do
-
-    let(:constructor) { spy("constructor") }
 
     it "applies the strategy pattern to construction" do
       subject.register(:my_plugin, type = Class.new, constructor)
@@ -38,6 +37,34 @@ describe Fabrique::PluginRegistry do
         expect(constructor).to have_received(:call).with(existing_type)
       end
 
+    end
+
+  end
+
+  describe "#acquire(id, properties = {})" do
+
+    let(:type) { Object }
+    before(:each) { subject.register(:my_plugin, type, constructor) }
+
+    it "applies the registered constructor to the registered type with the given properties" do
+      subject.acquire(:my_plugin, properties = {some: "properties"})
+      expect(constructor).to have_received(:call).with(type, properties)
+    end
+
+    it "applies the registered constructor to the registered type only if no properties are given" do
+      subject.acquire(:my_plugin)
+      expect(constructor).to have_received(:call).with(type)
+    end
+
+    it "returns the constructor call's return value" do
+      allow(constructor).to receive(:call).and_return(plugin = type.new)
+      expect(subject.acquire(:my_plugin)).to be plugin
+    end
+
+    it "raises an ArgumentError when the id is not registered" do
+      expect {
+        subject.acquire(:unregistered_plugin)
+      }.to raise_error(ArgumentError, /not registered/)
     end
 
   end
