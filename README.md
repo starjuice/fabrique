@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/starjuice/fabrique.svg?branch=master)](https://travis-ci.org/starjuice/fabrique)
+
 # Fabrique
 
 Factory support library for adapting existing modules for injection as dependencies.
