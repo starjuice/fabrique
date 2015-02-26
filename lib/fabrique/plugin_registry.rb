@@ -29,6 +29,10 @@ module Fabrique
         @registrations.detect { |r| r.id == id }
       end
 
+      def unregister(id)
+        @registrations.delete(find_registration(id))
+      end
+
       class Registration
 
         attr_reader :id, :type, :constructor

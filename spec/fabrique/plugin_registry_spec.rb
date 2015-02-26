@@ -61,10 +61,16 @@ describe Fabrique::PluginRegistry do
       expect(subject.acquire(:my_plugin)).to be plugin
     end
 
-    it "raises an ArgumentError when the id is not registered" do
-      expect {
-        subject.acquire(:unregistered_plugin)
-      }.to raise_error(ArgumentError, /not registered/)
+    context "when the unique identity has not yet been registered" do
+
+      before(:each) { subject.send(:unregister, :my_plugin) }
+
+      it "raises an ArgumentError" do
+        expect {
+          subject.acquire(:my_plugin)
+        }.to raise_error(ArgumentError, /not registered/)
+      end
+
     end
 
   end
