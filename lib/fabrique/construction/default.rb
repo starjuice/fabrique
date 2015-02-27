@@ -1,11 +1,13 @@
+require_relative "positional_argument"
+
 module Fabrique
 
   module Construction
 
-    class Default
+    class Default < PositionalArgument
 
-      def call(type)
-        type.new
+      def initialize
+        super()
       end
 
     end

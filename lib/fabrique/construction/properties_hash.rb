@@ -4,8 +4,12 @@ module Fabrique
 
     class PropertiesHash
 
-      def call(type, properties)
-        type.new(properties)
+      def call(type, properties = nil)
+        if properties.nil?
+          type.new
+        else
+          type.new(properties)
+        end
       end
 
     end
