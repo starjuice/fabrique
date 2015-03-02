@@ -69,3 +69,11 @@ Feature: Plugin registry
     Then I can acquire an instance of the class from the registry by its unique identity, specifying properties with a hash argument
     And the instance has the specified properties
 
+  Scenario: Builder pattern plugin
+
+    Given I have a plugin registry
+    And I have a class with a builder method
+    When I register the class into the registry with a unique identity and builder construction method
+    Then I can acquire an instance of the class from the registry by its unique identity, specifying properties with a hash argument
+    And the instance has the specified properties
+

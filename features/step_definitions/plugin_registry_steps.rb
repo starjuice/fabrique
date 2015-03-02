@@ -38,6 +38,10 @@ class PluginRegistryTestRunner
     @class = ClassWithKeywordArgumentConstructor
   end
 
+  def have_class_with_builder_method
+    @class = ClassWithBuilderMethod
+  end
+
   def register_class_with_as_is_constructor
     @identity = :my_plugin
     @registry.register(@identity, @class, Fabrique::Construction::Default.new)
@@ -68,6 +72,15 @@ class PluginRegistryTestRunner
   def register_class_with_keyword_argument_constructor
     @identity = :my_plugin
     @registry.register(@identity, @class, Fabrique::Construction::KeywordArgument.new)
+  end
+
+  def register_class_with_builder_method
+    @identity = :my_plugin
+    @registry.register(@identity, @class, Fabrique::Construction::BuilderMethod.new(:build) { |builder, properties|
+      builder.size = properties[:size]
+      builder.color = properties[:color]
+      builder.shape = properties[:shape]
+    })
   end
 
   def can_acquire_instances_of_class
@@ -142,6 +155,10 @@ Given(/^I have a class with a keyword argument constructor$/) do
   @test.have_class_with_keyword_argument_constructor
 end
 
+Given(/^I have a class with a builder method$/) do
+  @test.have_class_with_builder_method
+end
+
 When(/^I register the class into the registry with a unique identity and a default construction method$/) do
   @test.register_class_with_as_is_constructor
 end
@@ -164,6 +181,10 @@ end
 
 When(/^I register the class into the registry with a unique identity and a keyword argument construction method$/) do
   @test.register_class_with_keyword_argument_constructor
+end
+
+When(/^I register the class into the registry with a unique identity and builder construction method$/) do
+  @test.register_class_with_builder_method
 end
 
 Then(/^I can acquire instances of the class from the registry by its unique identity$/) do

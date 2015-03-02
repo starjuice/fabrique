@@ -50,7 +50,7 @@ module Fabrique
 
         end
 
-        class ClassWithBuilder < ClassWithProperties
+        class ClassWithBuilderMethod < ClassWithProperties
 
           private_class_method :new
 
