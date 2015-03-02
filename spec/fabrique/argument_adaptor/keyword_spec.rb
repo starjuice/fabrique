@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe Fabrique::ArgumentAdaptor::Native do
+describe Fabrique::ArgumentAdaptor::Keyword do
 
   describe "#adapt(*properties)" do
 

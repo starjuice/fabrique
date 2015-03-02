@@ -2,7 +2,7 @@ module Fabrique
 
   module ArgumentAdaptor
 
-    class Native
+    class Keyword
 
       def adapt(properties = nil)
         if properties.nil?
