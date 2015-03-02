@@ -5,25 +5,33 @@ module Fabrique
     # TODO Initialize with the name of the class we're adapting arguments for, for use in error messages
     class Positional
 
-      # TODO validate array argument specs
-      def initialize(*argument_names)
-        @argument_names = argument_names
+      def initialize(*argument_specifiers)
+        validate_argument_specifiers!(argument_specifiers)
+        @argument_specifiers = argument_specifiers
       end
 
       def adapt(properties = {})
-        @argument_names.inject([]) do |arguments, arg|
-          if arg.is_a?(Array)
-            arguments << adapt_optional_argument(properties, arg)
+        @argument_specifiers.inject([]) do |arguments, specifier|
+          if specifier.is_a?(Array)
+            arguments << adapt_optional_argument(properties, specifier)
           else
-            arguments << adapt_required_argument(properties, arg)
+            arguments << adapt_required_argument(properties, specifier)
           end
         end
       end
 
       private
 
-        def adapt_optional_argument(properties, argument_and_default)
-          arg, default = argument_and_default
+        def validate_argument_specifiers!(specifiers)
+          specifiers.each do |specifier|
+            specifier.is_a?(Symbol) or
+              specifier.is_a?(Array) && (specifier.size == 1 || specifier.size == 2) && specifier[0].is_a?(Symbol) or
+              raise ArgumentError.new("invalid argument specifier #{specifier}")
+          end
+        end
+
+        def adapt_optional_argument(properties, specifier)
+          arg, default = specifier
           if properties.include?(arg)
             properties[arg]
           elsif !default.nil?
@@ -33,7 +41,8 @@ module Fabrique
           end
         end
 
-        def adapt_required_argument(properties, arg)
+        def adapt_required_argument(properties, specifier)
+          arg = specifier
           if properties.include?(arg)
             properties[arg]
           else
