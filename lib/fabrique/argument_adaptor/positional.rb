@@ -5,6 +5,7 @@ module Fabrique
     # TODO Initialize with the name of the class we're adapting arguments for, for use in error messages
     class Positional
 
+      # TODO validate array argument specs
       def initialize(*argument_names)
         @argument_names = argument_names
       end
@@ -12,17 +13,33 @@ module Fabrique
       def adapt(properties = {})
         @argument_names.inject([]) do |arguments, arg|
           if arg.is_a?(Array)
-            arg.each do |optional_arg|
-              arguments << properties[optional_arg] if properties.include?(optional_arg)
-            end
-          elsif properties.include?(arg)
-            arguments << properties[arg]
+            arguments << adapt_optional_argument(properties, arg)
+          else
+            arguments << adapt_required_argument(properties, arg)
+          end
+        end
+      end
+
+      private
+
+        def adapt_optional_argument(properties, argument_and_default)
+          arg, default = argument_and_default
+          if properties.include?(arg)
+            properties[arg]
+          elsif !default.nil?
+            default
+          else
+            raise ArgumentError, "optional argument #{arg} (with no default) missing from properties"
+          end
+        end
+
+        def adapt_required_argument(properties, arg)
+          if properties.include?(arg)
+            properties[arg]
           else
             raise ArgumentError, "required argument #{arg} missing from properties"
           end
-          arguments
         end
-      end
 
     end
 
