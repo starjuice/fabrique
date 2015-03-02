@@ -24,8 +24,7 @@ module Fabrique
 
         end
 
-        class OtherClassWithDefaultConstructor < ClassWithProperties
-        end
+        OtherClassWithDefaultConstructor = Class.new(ClassWithDefaultConstructor)
 
         class ClassWithPropertiesHashConstructor < ClassWithProperties
 
