@@ -50,6 +50,28 @@ module Fabrique
 
         end
 
+        class ClassWithBuilder < ClassWithProperties
+
+          private_class_method :new
+
+          def initialize(builder)
+            @size, @color, @shape = builder.size, builder.color, builder.shape
+          end
+
+          def self.build
+            builder = Builder.new
+            if block_given?
+              yield builder
+            end
+            new(builder)
+          end
+
+          class Builder
+            attr_accessor :size, :color, :shape
+          end
+
+        end
+
       end
 
     end
