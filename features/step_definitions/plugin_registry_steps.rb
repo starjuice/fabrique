@@ -1,7 +1,9 @@
 require "rspec"
+require "fabrique/test"
 
 class PluginRegistryTestRunner
   include RSpec::Matchers
+  include Fabrique::Test::Fixtures::Constructors
 
   def initialize(subject_constructor)
     @subject_constructor = subject_constructor
@@ -60,7 +62,7 @@ class PluginRegistryTestRunner
 
   def register_class_with_positional_argument_constructor
     @identity = :my_plugin
-    @registry.register(@identity, @class, Fabrique::Construction::PositionalArgument.new(:color, :shape, :size))
+    @registry.register(@identity, @class, Fabrique::Construction::PositionalArgument.new(:size, :color, :shape))
   end
 
   def register_class_with_keyword_argument_constructor
@@ -91,47 +93,13 @@ class PluginRegistryTestRunner
   end
 
   def can_acquire_instance_of_class_with_properties
-    @instance = @registry.acquire(@identity, color: "pink", shape: "cube", size: "large")
+    @instance = @registry.acquire(@identity, size: "large", color: "pink", shape: "cube")
   end
 
   def can_verify_instance_properties
     expect(@instance.color).to eql "pink"
     expect(@instance.shape).to eql "cube"
     expect(@instance.size).to eql "large"
-  end
-
-  ClassWithDefaultConstructor = Class.new
-
-  OtherClassWithDefaultConstructor = Class.new
-
-  class ClassWithProperties
-
-    attr_reader :color, :shape, :size
-
-  end
-
-  class ClassWithPropertiesHashConstructor < ClassWithProperties
-
-    def initialize(properties)
-      @color, @shape, @size = properties[:color], properties[:shape], properties[:size]
-    end
-
-  end
-
-  class ClassWithPositionalArgumentConstructor < ClassWithProperties
-
-    def initialize(color, shape, size)
-      @color, @shape, @size = color, shape, size
-    end
-
-  end
-
-  class ClassWithKeywordArgumentConstructor < ClassWithProperties
-
-    def initialize(color: nil, shape: nil, size: nil)
-      @color, @shape, @size = color, shape, size
-    end
-
   end
 
 end

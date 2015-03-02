@@ -122,6 +122,23 @@ describe Fabrique::ArgumentAdaptor::Positional do
       end
     end
 
+    it "supports default constructors" do
+      klass = Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+      object = klass.new(*subject.adapt())
+      expect(object.size).to eql klass::DEFAULT_SIZE
+      expect(object.color).to eql klass::DEFAULT_COLOR
+      expect(object.shape).to eql klass::DEFAULT_SHAPE
+    end
+
+    it "supports positional argument constructors" do
+      klass = Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+      subject = described_class.new(:size, :color, :shape)
+      object = klass.new(*subject.adapt(size: "small", color: "red", shape: "dot"))
+      expect(object.size).to eql "small"
+      expect(object.color).to eql "red"
+      expect(object.shape).to eql "dot"
+    end
+
   end
 
 end
