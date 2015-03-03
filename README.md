@@ -66,7 +66,7 @@ What kinds of construction process do we care about?
   PropertyValidator).
 
 So this is a good pressure to compose everything except Properties
-into the Constructor, registered by plugin_identity.
+into the Constructor, registered by plugin\_identity.
 
 #### Classical
 
