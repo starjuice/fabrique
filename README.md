@@ -42,7 +42,7 @@ def fabricate(registry, plugin_identity, properties)
   property_validator = registration.property_validator
   argument_adaptor = registration.argument_adaptor
   constructor = registration.constructor
-  plugin_template = registration.template
+  plugin_template = registration.template # Currently called the type
 
   if property_validator.valid?(properties)
     arguments = argument_adaptor.adapt(properties)
@@ -54,7 +54,30 @@ def fabricate(registry, plugin_identity, properties)
 end
 ```
 
-Will this work for all the constructors we want to support?
+So we might compose thus:
+
+```
+# API gem does this
+class Store
+  # API definition
+end
+StoreFactory = PluggableApiFactory.new(Store, PluginFactoryRegistry.new("Certmeister Store Plugin Registry"))
+
+# Plugin gem does this
+require "store_api/store_factory"
+class S3StoreProvider
+  # API implementation here
+end
+S3StoreFactory = PluginFactory.new(S3StoreProvider, Constructor::Classical.new, ArgumentAdaptor::Keyword.new, NoopPropertyValidator.new)
+StoreFactory.register_plugin(:s3, S3StoreFactory)
+
+# Consumer does this
+Bundler.require(:default) # To pull in whichever provider is in the Gemfile
+api = StoreFactory.create(:s3, some: "properties") # Returns a Store initialized with an S3StoreProvider
+```
+
+The point of rigidity is now the StoreFactory. Should we solve that with a configurable (and dare I say pluggable?)
+factory locator?
 
 ### Constructors
 
