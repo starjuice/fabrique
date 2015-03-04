@@ -56,24 +56,47 @@ end
 
 So we might compose thus:
 
-```
+```ruby
+class PluggableApiFactory
+  def initialize(api_factory, plugin_registry)
+    @api_factory, @plugin_registry = api_factory, plugin_registry
+  end
+
+  def create(plugin_id, properties)
+    plugin_factory = @plugin_registry.find(plugin_id)
+    plugin = plugin_factory.create(properties)
+    @api_factory.create(plugin: plugin)
+  end
+end
+
 # API gem does this
 class Store
+  def initialize(provider)
+    @provider = provider
+  end
   # API definition
 end
-StoreFactory = PluggableApiFactory.new(Store, PluginFactoryRegistry.new("Certmeister Store Plugin Registry"))
+StoreApiPluginRegistry = PluginFactoryRegistry.new("Certmeister Store Plugin Registry")
+StoreApiFactory = PluginFactory.new(Store, Constructor::Classical.new, ArgumentAdaptor::Positional.new(:plugin), NoopPropertyValidator.new)
+StoreFactory = PluggableApiFactory.new(StoreApiFactory, StoreApiPluginRegistry)
 
 # Plugin gem does this
-require "store_api/store_factory"
-class S3StoreProvider
+require "store_api"
+class S3StorePlugin
   # API implementation here
 end
-S3StoreFactory = PluginFactory.new(S3StoreProvider, Constructor::Classical.new, ArgumentAdaptor::Keyword.new, NoopPropertyValidator.new)
-StoreFactory.register_plugin(:s3, S3StoreFactory)
+S3StorePluginFactory = PluginFactory.new(S3StorePlugin, Constructor::Classical.new, ArgumentAdaptor::Keyword.new, NoopPropertyValidator.new)
+StoreApiPluginRegistry.register_plugin(:s3, S3StorePluginFactory)
 
-# Consumer does this
+# Consumer does this (decoupling from the plugin strategy, but forever making it StoreFactory's problem):
 Bundler.require(:default) # To pull in whichever provider is in the Gemfile
-api = StoreFactory.create(:s3, some: "properties") # Returns a Store initialized with an S3StoreProvider
+api = StoreFactory.create(:s3, region: "eu-west-1", bucket: "fabrique") # Returns a Store initialized with an S3StorePlugin
+
+# or this (but now you're coupled to the plugin strategy, *and* so is StoreApiFactory!)
+Bundler.require(:default)
+plugin_factory = StoreApiPluginRegistry.find(:s3)
+plugin = plugin_factory.create(region: "eu-west-1", bucket: "fabrique")
+api = StoreApiFactory.create(plugin: plugin)
 ```
 
 The point of rigidity is now the StoreFactory. Should we solve that with a configurable (and dare I say pluggable?)
