@@ -65,7 +65,7 @@ class PluggableApiFactory
   def create(plugin_id, properties)
     plugin_factory = @plugin_registry.find(plugin_id)
     plugin = plugin_factory.create(properties)
-    @api_factory.create(plugin: plugin)
+    @api_factory.create(plugin)
   end
 end
 
@@ -89,12 +89,10 @@ S3StorePluginFactory = PluginFactory.new(S3StorePlugin, Constructor::Classical.n
 StoreApiPluginRegistry.register_plugin(:s3, S3StorePluginFactory)
 
 # Consumer does this (decoupling from the plugin strategy, but forever making it StoreFactory's problem).
-# The downside of this approach is that it doesn't easily support initializing the API with its own properties.
 Bundler.require(:default) # To pull in whichever provider is in the Gemfile
 api = StoreFactory.create(:s3, region: "eu-west-1", bucket: "fabrique") # Returns a Store initialized with an S3StorePlugin
 
 # or this (but now you're coupled to the plugin strategy, *and* so is StoreApiFactory!)
-# But the upside is that StoreApiFactory could easily be extended to support intializing the API with its own properties.
 Bundler.require(:default)
 plugin_factory = StoreApiPluginRegistry.find(:s3)
 plugin = plugin_factory.create(region: "eu-west-1", bucket: "fabrique")
