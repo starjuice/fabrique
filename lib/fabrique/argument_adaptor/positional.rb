@@ -34,7 +34,7 @@ module Fabrique
           arg, default = specifier
           if properties.include?(arg)
             properties[arg]
-          elsif !default.nil?
+          elsif specifier.size == 2
             default
           else
             raise ArgumentError, "optional argument #{arg} (with no default) missing from properties"

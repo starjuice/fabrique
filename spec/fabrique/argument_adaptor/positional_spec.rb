@@ -122,6 +122,28 @@ describe Fabrique::ArgumentAdaptor::Positional do
       end
     end
 
+    context "when initialized with optional argument names with nil as the default value, followed by required argument names" do
+      subject { described_class.new([:size, nil], [:color, nil], :shape) }
+
+      context "when called with a property for each argument name" do
+        it "returns an array of the property value of each argument name in the order specified to new()" do
+          expect(subject.adapt(shape: "dot", size: "small", color: "red")).to eql ["small", "red", "dot"]
+        end
+      end
+
+      context "when called with at least one property missing for an optional argument" do
+        it "returns an array of the provided property values and default values, in the order specified to new()" do
+          expect(subject.adapt(color: "red", shape: "dot")).to eql [nil, "red", "dot"]
+        end
+      end
+
+      context "when called with at least one property missing for a required argument" do
+        it "raises an ArgumentError" do
+          expect { subject.adapt(size: "small", color: "red") }.to raise_error(ArgumentError, /required argument \w+ missing from properties/)
+        end
+      end
+    end
+
     it "supports default constructors" do
       klass = Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       object = klass.new(*subject.adapt())
