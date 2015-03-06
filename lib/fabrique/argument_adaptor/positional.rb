@@ -6,49 +6,68 @@ module Fabrique
     class Positional
 
       def initialize(*argument_specifiers)
-        validate_argument_specifiers!(argument_specifiers)
-        @argument_specifiers = argument_specifiers
+        @positional_arguments = argument_specifiers.map { |spec| PositionalArgument.create(spec) }
       end
 
       def adapt(properties = {})
-        @argument_specifiers.inject([]) do |arguments, specifier|
-          if specifier.is_a?(Array)
-            arguments << adapt_optional_argument(properties, specifier)
-          else
-            arguments << adapt_required_argument(properties, specifier)
-          end
-        end
+        @positional_arguments.map { |argument| argument.pick(properties) }
       end
 
-      private
+      class PositionalArgument
 
-        def validate_argument_specifiers!(specifiers)
-          specifiers.each do |specifier|
-            specifier.is_a?(Symbol) or
-              specifier.is_a?(Array) && (specifier.size == 1 || specifier.size == 2) && specifier[0].is_a?(Symbol) or
-              raise ArgumentError.new("invalid argument specifier #{specifier}")
+        class Required
+          def initialize(arg)
+            @arg = arg
+          end
+
+          def pick(properties)
+            pick_or_do(properties) do
+              raise ArgumentError, "required argument #{@arg} missing from properties"
+            end
+          end
+
+          private
+
+          def pick_or_do(properties, &block)
+            if properties.include?(@arg)
+              properties[@arg]
+            else
+              block.call
+            end
           end
         end
 
-        def adapt_optional_argument(properties, specifier)
-          arg, default = specifier
-          if properties.include?(arg)
-            properties[arg]
-          elsif specifier.size == 2
-            default
+        class Optional < Required
+          def pick(properties)
+            pick_or_do(properties) do
+              raise ArgumentError, "optional argument #{@arg} (with no default) missing from properties"
+            end
+          end
+        end
+
+        class Default < Required
+          def initialize(arg, default)
+            @arg, @default = arg, default
+          end
+
+          def pick(properties)
+            pick_or_do(properties) { @default }
+          end
+        end
+
+        def self.create(specifier)
+          if specifier.is_a?(Symbol)
+            Required.new(specifier)
+          elsif specifier.is_a?(Array) and specifier.size == 1 and specifier[0].is_a?(Symbol)
+            Optional.new(*specifier)
+          elsif specifier.is_a?(Array) and specifier.size == 2 and specifier[0].is_a?(Symbol)
+            Default.new(*specifier)
           else
-            raise ArgumentError, "optional argument #{arg} (with no default) missing from properties"
+            raise ArgumentError.new("invalid argument specifier #{specifier}")
           end
         end
 
-        def adapt_required_argument(properties, specifier)
-          arg = specifier
-          if properties.include?(arg)
-            properties[arg]
-          else
-            raise ArgumentError, "required argument #{arg} missing from properties"
-          end
-        end
+      end
 
     end
 
