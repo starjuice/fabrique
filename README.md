@@ -57,18 +57,6 @@ end
 So we might compose thus:
 
 ```ruby
-class PluggableApiFactory
-  def initialize(api_factory, plugin_registry)
-    @api_factory, @plugin_registry = api_factory, plugin_registry
-  end
-
-  def create(plugin_id, properties)
-    plugin_factory = @plugin_registry.find(plugin_id)
-    plugin = plugin_factory.create(properties)
-    @api_factory.create(plugin)
-  end
-end
-
 # API gem does this
 class Store
   def initialize(provider)
@@ -76,31 +64,49 @@ class Store
   end
   # API definition
 end
-StoreApiPluginRegistry = PluginFactoryRegistry.new("Certmeister Store Plugin Registry")
-StoreApiFactory = PluginFactory.new(Store, Constructor::Classical.new, ArgumentAdaptor::Positional.new(:plugin), NoopPropertyValidator.new)
-StoreFactory = PluggableApiFactory.new(StoreApiFactory, StoreApiPluginRegistry)
+StoreApiFactory = Fabrique::FactoryAdaptor.new(
+  template: Store,
+  constructor: Constructor::Classical.new,
+  argument_adaptor: ArgumentAdaptor::Positional.new(:provider)
+)
+StoreApiProviderRegistry = Fabrique::Registry.new("Store API Provider Registry")
 
-# Plugin gem does this
+# Provider gem does this
 require "store_api"
-class S3StorePlugin
+class S3StoreProvider
   # API implementation here
 end
-S3StorePluginFactory = PluginFactory.new(S3StorePlugin, Constructor::Classical.new, ArgumentAdaptor::Keyword.new, NoopPropertyValidator.new)
-StoreApiPluginRegistry.register_plugin(:s3, S3StorePluginFactory)
+S3StoreProviderFactory = Fabrique::FactoryAdaptor.new(
+  template: S3StoreProvider,
+  constructor: Constructor::Classical.new,
+  argument_adaptor: ArgumentAdaptor::Keyword.new,
+)
+StoreApiProviderRegistry.register(:s3, S3StoreProviderFactory)
 
-# Consumer does this (decoupling from the plugin strategy, but forever making it StoreFactory's problem).
-Bundler.require(:default) # To pull in whichever provider is in the Gemfile
-api = StoreFactory.create(:s3, region: "eu-west-1", bucket: "fabrique") # Returns a Store initialized with an S3StorePlugin
-
-# or this (but now you're coupled to the plugin strategy, *and* so is StoreApiFactory!)
+# API consumer does this
 Bundler.require(:default)
-plugin_factory = StoreApiPluginRegistry.find(:s3)
-plugin = plugin_factory.create(region: "eu-west-1", bucket: "fabrique")
-api = StoreApiFactory.create(plugin: plugin)
+provider_factory = StoreApiProviderRegistry.find(:s3)
+provider = provider_factory.create(region: "eu-west-1", bucket: "fabrique")
+api = StoreApiFactory.create(provider: provider)
+
+# Now, if the API consumer and the API developer agree that this is too high ceremony...
+
+# API gem adds this
+class StoreFactory
+  def self.create(provider_id: DEFAULT_PROVIDER, provider_properties: DEFAULT_PROVIDER_PROPERTIES)
+	  provider_factory = StoreApiProviderRegistry.find(:s3)
+		provider = provider_factory.create(provider_properties)
+		StoreApiFactory.create(provider: provider)
+	end
+end
+
+# and API consumer just does this
+Bundler.require(:default)
+api = StoreFactory.create(provider_id: :s3, provider_properties: {region: "eu-west-1", bucket: "fabrique"})
 ```
 
-The point of rigidity is now the StoreFactory. Should we solve that with a configurable (and dare I say pluggable?)
-factory locator?
+Fabrique might be able to offer an easy way to build the low ceremony "provider
+API factory". Let's wait and see if high ceremony is really a problem for people.
 
 ### Constructors
 
