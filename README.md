@@ -94,10 +94,10 @@ api = StoreApiFactory.create(provider: provider)
 # API gem adds this
 class StoreFactory
   def self.create(provider_id: DEFAULT_PROVIDER, provider_properties: DEFAULT_PROVIDER_PROPERTIES)
-	  provider_factory = StoreApiProviderRegistry.find(:s3)
-		provider = provider_factory.create(provider_properties)
-		StoreApiFactory.create(provider: provider)
-	end
+    provider_factory = StoreApiProviderRegistry.find(:s3)
+    provider = provider_factory.create(provider_properties)
+    StoreApiFactory.create(provider: provider)
+  end
 end
 
 # and API consumer just does this
