@@ -69,7 +69,7 @@ StoreApiFactory = Fabrique::FactoryAdaptor.new(
   constructor: Constructor::Classical.new,
   argument_adaptor: ArgumentAdaptor::Positional.new(:provider)
 )
-StoreApiProviderRegistry = Fabrique::Registry.new("Store API Provider Registry")
+StoreProviderFactoryRegistry = Fabrique::Registry.new("Store API Provider Registry")
 
 # Provider gem does this
 require "store_api"
@@ -81,11 +81,11 @@ S3StoreProviderFactory = Fabrique::FactoryAdaptor.new(
   constructor: Constructor::Classical.new,
   argument_adaptor: ArgumentAdaptor::Keyword.new,
 )
-StoreApiProviderRegistry.register(:s3, S3StoreProviderFactory)
+StoreProviderFactoryRegistry.register(:s3, S3StoreProviderFactory)
 
 # API consumer does this
 Bundler.require(:default)
-provider_factory = StoreApiProviderRegistry.find(:s3)
+provider_factory = StoreProviderFactoryRegistry.find(:s3)
 provider = provider_factory.create(region: "eu-west-1", bucket: "fabrique")
 api = StoreApiFactory.create(provider: provider)
 
@@ -94,7 +94,7 @@ api = StoreApiFactory.create(provider: provider)
 # API gem adds this
 class StoreFactory
   def self.create(provider_id: DEFAULT_PROVIDER, provider_properties: DEFAULT_PROVIDER_PROPERTIES)
-    provider_factory = StoreApiProviderRegistry.find(:s3)
+    provider_factory = StoreProviderFactoryRegistry.find(provider_id)
     provider = provider_factory.create(provider_properties)
     StoreApiFactory.create(provider: provider)
   end
