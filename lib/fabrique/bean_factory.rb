@@ -10,7 +10,12 @@ module Fabrique
       type_name = @ctx["beans"][bean_name]["class"]
       type = Module.const_get(type_name)
       arguments = @ctx["beans"][bean_name]["arguments"]
-      type.new(*arguments)
+      if arguments.respond_to?(:keys)
+        arguments = arguments.inject({}) { |m, (k, v)| m[k.intern] = v; m }
+        type.new(arguments)
+      else
+        type.new(*arguments)
+      end
     end
 
   end
