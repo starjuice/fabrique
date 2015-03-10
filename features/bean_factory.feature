@@ -39,7 +39,6 @@ Feature: Bean Factory
     And the bean has "color" set to "red"
     And the bean has "shape" set to "dot"
 
-
   Scenario: Simple object with keyword argument constructor
 
     Given I have a YAML application context:
@@ -87,7 +86,7 @@ Feature: Bean Factory
       beans:
         my_module:
           template: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
-          method: identity
+          factory_method: itself
       """
     When I request a bean factory for the application context
     And I request the "my_module" bean from the bean factory
@@ -106,7 +105,7 @@ Feature: Bean Factory
           constructor_args:
             - small
             - red
-            - bean:child
+            - {bean: child}
         child:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
           constructor_args:
@@ -165,4 +164,42 @@ Feature: Bean Factory
     Then the bean has "size" set to "large"
     And the bean has "color" set to "blue"
     And the bean has "shape" set to "square"
+
+  Scenario: Constructor argument type
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        simple_object:
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          constructor_args:
+            - infinite
+            - invisible
+            - {type: Integer, value: "42"}
+      """
+    When I request a bean factory for the application context
+    And I request the "simple_object" bean from the bean factory
+    Then the bean has "size" set to "infinite"
+    And the bean has "color" set to "invisible"
+    And the bean has "shape" that is the Integer "42"
+
+  Scenario: Property argument type
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        simple_object:
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          properties:
+            size: infinite
+            color: invisible
+            shape: {type: Integer, value: "42"}
+      """
+    When I request a bean factory for the application context
+    And I request the "simple_object" bean from the bean factory
+    Then the bean has "size" set to "infinite"
+    And the bean has "color" set to "invisible"
+    And the bean has "shape" that is the Integer "42"
 

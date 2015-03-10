@@ -16,6 +16,10 @@ Then(/^the bean has "(.*?)" set to "(.*?)"$/) do |attr, value|
   expect(@bean.send(attr)).to eql value
 end
 
+Then(/^the bean has "(.*?)" that is the Integer "(.*?)"$/) do |attr, int_value|
+  expect(@bean.send(attr)).to eql int_value.to_i
+end
+
 Then(/^the "(.*?)" bean has "(.*?)" set to the "(.*?)" bean$/) do |parent, attr, child|
   parent = @bean_factory.get_bean(parent)
   child = @bean_factory.get_bean(child)
