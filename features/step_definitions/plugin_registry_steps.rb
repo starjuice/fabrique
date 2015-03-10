@@ -122,8 +122,6 @@ require "fabrique"
 Before do |scenario|
   if scenario.source_tags.any? { |tag| tag.name == "@plugin_registry" }
     @test = PluginRegistryTestRunner.new( -> {Fabrique::PluginRegistry.new("Test plugin registry")})
-  else
-    raise "test runner not defined for scenario: #{scenario.name}: #{scenario.location}"
   end
 end
 

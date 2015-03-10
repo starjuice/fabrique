@@ -1,0 +1,23 @@
+---
+beans:
+  invoice_service:
+    class: InvoiceService
+    method: constructor
+    arguments:
+      - bean:billing_provider
+      - bean:asset_provider
+      - dry_run: true
+  billing_provider:
+    class: FreshBooksBillingProvider
+    method: constructor
+    arguments:
+      - url: https://fb.localdomain/ep
+        license_key: 497bca6b-50192c4c-8384f347-4a3ea754-082a7d70-45e041e2-9cfe07a1-3544d7e5
+  asset_provider:
+    class: AssetPointAssetProvider
+    method: constructor
+    arguments:
+      host: 192.168.22.42
+      port: 443
+      username: user
+      password: secret
