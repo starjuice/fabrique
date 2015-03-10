@@ -99,3 +99,28 @@ Feature: Bean Factory
     And the bean has "color" set to "module color"
     And the bean has "shape" set to "module shape"
 
+  Scenario: Composite bean
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        parent:
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          method: constructor
+          arguments:
+            - small
+            - red
+            - bean:child
+        child:
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+          method: constructor
+          arguments:
+            size: squished
+            color: brown
+            shape: poop
+      """
+    When I request a bean factory for the application context
+    And I request the "parent" bean from the bean factory
+    Then the "parent" bean has "shape" set to the "child" bean
+    And the "child" bean has "shape" set to "poop"
