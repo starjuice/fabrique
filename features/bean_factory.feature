@@ -12,7 +12,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
           method: constructor
       """
     When I request a bean factory for the application context
@@ -28,7 +28,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
           method: constructor
           arguments:
             - small
@@ -49,7 +49,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
           method: constructor
           arguments:
             size: large
@@ -70,7 +70,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
           method: constructor
           arguments:
             size: tiny
@@ -82,4 +82,20 @@ Feature: Bean Factory
     Then the bean has "size" set to "tiny"
     And the bean has "color" set to "purple"
     And the bean has "shape" set to "elephant"
+
+  Scenario: Module by identity
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        my_module:
+          template: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
+          method: identity
+      """
+    When I request a bean factory for the application context
+    And I request the "my_module" bean from the bean factory
+    Then the bean has "size" set to "module size"
+    And the bean has "color" set to "module color"
+    And the bean has "shape" set to "module shape"
 
