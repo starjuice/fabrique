@@ -27,3 +27,12 @@ Then(/^the "(.*?)" bean has "(.*?)" set to "(.*?)"$/) do |bean_name, attr, value
   expect(bean.send(attr)).to eql(value)
 end
 
+Then(/^I get the same object when I request the "(.*?)" bean again$/) do |bean_name|
+  new_reference = @bean_factory.get_bean(bean_name)
+  expect(new_reference.object_id).to eql @bean.object_id
+end
+
+Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bean_name|
+  new_reference = @bean_factory.get_bean(bean_name)
+  expect(new_reference.object_id).to_not eql @bean.object_id
+end

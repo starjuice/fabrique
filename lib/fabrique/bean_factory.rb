@@ -2,29 +2,46 @@ module Fabrique
 
   class BeanFactory
 
-    def initialize(application_context)
-      @ctx = application_context
-      @beans = {}
+    # TODO Take a BeanDefinitionRegistry
+    def initialize(bean_config)
+      @cfg = bean_config
+      @singletons = {}
     end
 
     def get_bean(bean_name)
-      @beans[bean_name] ||= build_bean(bean_name)
+      defn = get_bean_definition(bean_name)
+      case (defn["scope"] || "singleton")
+      when "prototype"
+        build_bean(defn)
+      when "singleton"
+        @singletons[bean_name] ||= build_bean(defn)
+      end
     end
 
     private
 
-      def build_bean(bean_name)
-        template_name = @ctx["beans"][bean_name]["template"]
+      def get_bean_definition(bean_name)
+        @cfg["beans"][bean_name]
+      end
+
+      def build_bean(defn)
+        template_name = defn["template"]
         template = Module.const_get(template_name)
-        arguments = @ctx["beans"][bean_name]["arguments"]
-        case @ctx["beans"][bean_name]["method"]
+        case (defn["method"] or "constructor")
         when "constructor"
-          if arguments.respond_to?(:keys)
+          arguments = defn["constructor_args"]
+          bean = if arguments.respond_to?(:keys)
             arguments = arguments.inject({}) { |m, (k, v)| m[k.intern] = interpolate(v); m }
             template.new(arguments)
           else
             arguments = arguments.map { |v| interpolate(v) } if arguments.respond_to?(:map)
             template.new(*arguments)
+          end
+          bean.tap do |b|
+            properties = defn["properties"]
+            properties.each do |k, v|
+              b.send("#{k}=", v)
+            end
           end
         when "identity"
           template

@@ -12,7 +12,7 @@ module Fabrique
           DEFAULT_COLOR = "default color" unless defined?(DEFAULT_COLOR)
           DEFAULT_SHAPE = "default shape" unless defined?(DEFAULT_SHAPE)
 
-          attr_reader :size, :color, :shape
+          attr_accessor :size, :color, :shape
 
         end
 

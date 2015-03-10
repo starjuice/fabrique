@@ -13,7 +13,6 @@ Feature: Bean Factory
       beans:
         simple_object:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
-          method: constructor
       """
     When I request a bean factory for the application context
     And I request the "simple_object" bean from the bean factory
@@ -29,8 +28,7 @@ Feature: Bean Factory
       beans:
         simple_object:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
-          method: constructor
-          arguments:
+          constructor_args:
             - small
             - red
             - dot
@@ -50,8 +48,7 @@ Feature: Bean Factory
       beans:
         simple_object:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
-          method: constructor
-          arguments:
+          constructor_args:
             size: large
             color: black
             shape: hole
@@ -71,8 +68,7 @@ Feature: Bean Factory
       beans:
         simple_object:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
-          method: constructor
-          arguments:
+          constructor_args:
             size: tiny
             color: purple
             shape: elephant
@@ -99,7 +95,7 @@ Feature: Bean Factory
     And the bean has "color" set to "module color"
     And the bean has "shape" set to "module shape"
 
-  Scenario: Composite bean
+  Scenario: Bean reference
 
     Given I have a YAML application context:
       """
@@ -107,15 +103,13 @@ Feature: Bean Factory
       beans:
         parent:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
-          method: constructor
-          arguments:
+          constructor_args:
             - small
             - red
             - bean:child
         child:
           template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
-          method: constructor
-          arguments:
+          constructor_args:
             size: squished
             color: brown
             shape: poop
@@ -124,3 +118,51 @@ Feature: Bean Factory
     And I request the "parent" bean from the bean factory
     Then the "parent" bean has "shape" set to the "child" bean
     And the "child" bean has "shape" set to "poop"
+
+  Scenario: Singleton bean (default
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        simple_object:
+          scope: singleton
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+      """
+    When I request a bean factory for the application context
+    And I request the "simple_object" bean from the bean factory
+    Then I get the same object when I request the "simple_object" bean again
+
+  Scenario: Prototype bean
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        simple_object:
+          scope: prototype
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+      """
+    When I request a bean factory for the application context
+    And I request the "simple_object" bean from the bean factory
+    Then I get a different object when I request the "simple_object" bean again
+
+  Scenario: Setter injection
+
+    Given I have a YAML application context:
+      """
+      ---
+      beans:
+        simple_object:
+          template: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          properties:
+            size: large
+            color: blue
+            shape: square
+      """
+    When I request a bean factory for the application context
+    And I request the "simple_object" bean from the bean factory
+    Then the bean has "size" set to "large"
+    And the bean has "color" set to "blue"
+    And the bean has "shape" set to "square"
+
