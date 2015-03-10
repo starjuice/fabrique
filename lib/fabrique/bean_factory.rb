@@ -25,20 +25,20 @@ module Fabrique
       end
 
       def build_bean(defn)
-        template_name = defn["template"]
-        template = Module.const_get(template_name)
+        type_name = defn["class"]
+        type = Module.const_get(type_name)
         arguments = defn["constructor_args"] #? || []
         factory_method = defn["factory_method"] || "new"
         if factory_method == "itself"
           # Support RUBY_VERSION < 2.2.0 (missing Kernel#itself)
-          template
+          type
         else
           bean = if arguments.respond_to?(:keys)
             arguments = arguments.inject({}) { |m, (k, v)| m[k.intern] = resolve_value(v); m }
-            template.send(factory_method, arguments)
+            type.send(factory_method, arguments)
           else
             arguments = arguments.map { |v| resolve_value(v) } if arguments.respond_to?(:map)
-            template.send(factory_method, *arguments)
+            type.send(factory_method, *arguments)
           end
           bean.tap do |b|
             properties = defn["properties"] || []

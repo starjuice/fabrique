@@ -12,7 +12,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
     When I request a bean factory for the application context
     And I request the "simple_object" bean from the bean factory
@@ -27,7 +27,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
           constructor_args:
             - small
             - red
@@ -46,7 +46,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
           constructor_args:
             size: large
             color: black
@@ -66,7 +66,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
           constructor_args:
             size: tiny
             color: purple
@@ -85,7 +85,7 @@ Feature: Bean Factory
       ---
       beans:
         my_module:
-          template: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
+          class: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
           factory_method: itself
       """
     When I request a bean factory for the application context
@@ -101,13 +101,13 @@ Feature: Bean Factory
       ---
       beans:
         parent:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
           constructor_args:
             - small
             - red
             - {bean: child}
         child:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
           constructor_args:
             size: squished
             color: brown
@@ -126,7 +126,7 @@ Feature: Bean Factory
       beans:
         simple_object:
           scope: singleton
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
     When I request a bean factory for the application context
     And I request the "simple_object" bean from the bean factory
@@ -140,7 +140,7 @@ Feature: Bean Factory
       beans:
         simple_object:
           scope: prototype
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
     When I request a bean factory for the application context
     And I request the "simple_object" bean from the bean factory
@@ -153,7 +153,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
           properties:
             size: large
             color: blue
@@ -172,7 +172,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
           constructor_args:
             - infinite
             - invisible
@@ -191,7 +191,7 @@ Feature: Bean Factory
       ---
       beans:
         simple_object:
-          template: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
           properties:
             size: infinite
             color: invisible
