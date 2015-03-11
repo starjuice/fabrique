@@ -100,23 +100,31 @@ Feature: Bean Factory
       """
       ---
       beans:
-        parent:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        customer_repository:
+          class: Fabrique::Test::Fixtures::Repository::CustomerRepository
           constructor_args:
-            - small
-            - red
-            - {bean: child}
-        child:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+            - {bean: store}
+            - {bean: customer_data_mapper}
+        product_repository:
+          class: Fabrique::Test::Fixtures::Repository::ProductRepository
           constructor_args:
-            size: squished
-            color: brown
-            shape: poop
+            store: {bean: store}
+            data_mapper: {bean: product_data_mapper}
+        store:
+          class: Fabrique::Test::Fixtures::Repository::MysqlStore
+          constructor_args:
+            host: localhost
+            port: 3306
+        customer_data_mapper:
+          class: Fabrique::Test::Fixtures::Repository::CustomerDataMapper
+          scope: prototype
+        product_data_mapper:
+          class: Fabrique::Test::Fixtures::Repository::ProductDataMapper
+          scope: prototype
       """
     When I request a bean factory for the application context
-    And I request the "parent" bean from the bean factory
-    Then the "parent" bean has "shape" set to the "child" bean
-    And the "child" bean has "shape" set to "poop"
+    Then the "customer_repository" and "product_repository" beans share the same "store"
+    And the "customer_repository" and "product_repository" beans each have their own "data_mapper"
 
   Scenario: Cyclic bean property reference
 

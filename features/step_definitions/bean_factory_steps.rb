@@ -44,3 +44,16 @@ end
 Then(/^I get a cyclic bean reference error when I request the "(.*?)" bean from the bean factory$/) do |bean_name|
   expect { @bean_factory.get_bean(bean_name) }.to raise_error(/cyclic bean reference/)
 end
+
+Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|
+  bean1 = @bean_factory.get_bean(bean1_name)
+  bean2 = @bean_factory.get_bean(bean2_name)
+  expect(bean1.send(shared_property).object_id).to eql bean2.send(shared_property).object_id
+end
+
+Then(/^the "(.*?)" and "(.*?)" beans each have their own "(.*?)"$/) do |bean1_name, bean2_name, own_property|
+  bean1 = @bean_factory.get_bean(bean1_name)
+  bean2 = @bean_factory.get_bean(bean2_name)
+  expect(bean1.send(own_property).object_id).to_not eql bean2.send(own_property).object_id
+end
+
