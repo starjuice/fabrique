@@ -22,6 +22,15 @@ module Fabrique
       @scope == "singleton"
     end
 
+    def constructor_deps
+      values = @constructor_args.respond_to?(:keys) ? @constructor_args.values : @constructor_args
+      values.select { |v| v.bean_reference? }.map { |v| v.bean }
+    end
+
+    def property_deps
+      @properties.values.select { |v| v.bean_reference? }.map { |v| v.bean }
+    end
+
     private
 
       def formalize_properties(props)
@@ -72,11 +81,38 @@ module Fabrique
 
   end
 
+  require "tsort"
+  class BeanDefinitionRegistry
+    include TSort
+
+    def initialize(config)
+      @defs = config["beans"].inject({}) { |acc, (k, v)| acc[k] = BeanDefinition.new(v, k); acc }
+    end
+
+    def get_definition(bean_name)
+      @defs[bean_name]
+    end
+
+    def tsort_each_child(node, &block)
+      node.constructor_deps.map { |dep| @defs[dep] }.each(&block)
+    end
+
+    def tsort_each_node
+      @defs.each_value do |defn|
+        yield defn
+      end
+    end
+
+    def construction_path(bean_name)
+      tsort
+    end
+  end
+
   class BeanFactory
 
     # TODO Take a BeanDefinitionRegistry
     def initialize(config)
-      @config = config
+      @registry = BeanDefinitionRegistry.new(config)
       @singletons = {}
       @semaphore = Mutex.new
     end
@@ -85,10 +121,17 @@ module Fabrique
       @semaphore.synchronize do
         begin
           @bean_reference_cache = {}
-          get_bean_unsynchronized(bean_name)
-        rescue SystemStackError
-          # TODO Introduce cyclic bean reference detection
-          raise "cyclic bean reference error detected"
+          @registry.construction_path(bean_name).each do |defn|
+            bean = get_bean_unsynchronized(defn.name)
+            @bean_reference_cache[defn.name] = bean
+          end
+          @bean_reference_cache.each do |n, bean|
+            property_injection(bean, @registry.get_definition(n))
+          end
+          @bean_reference_cache[bean_name]
+        rescue TSort::Cyclic => e
+          # TODO describe the cyclic dependency
+          raise "cyclic bean reference error detected #{e.inspect}"
         ensure
           @bean_reference_cache = nil
         end
@@ -98,11 +141,11 @@ module Fabrique
     private
 
       def get_bean_definition(bean_name)
-        BeanDefinition.new(@config["beans"][bean_name], bean_name)
+        @registry.values.detect { |defn| defn.name == bean_name }
       end
 
       def get_bean_unsynchronized(bean_name)
-        defn = get_bean_definition(bean_name)
+        defn = @registry.get_definition(bean_name)
         if defn.singleton?
           @singletons[bean_name] ||= build_bean(defn)
         else
@@ -115,8 +158,7 @@ module Fabrique
           # Support RUBY_VERSION < 2.2.0 (missing Kernel#itself)
           defn.type
         else
-          bean = @bean_reference_cache[defn.name] ||= constructor_injection(defn)
-          property_injection(bean, defn)
+          constructor_injection(defn)
         end
       end
 
