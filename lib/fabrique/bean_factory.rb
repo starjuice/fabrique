@@ -81,6 +81,9 @@ module Fabrique
 
   end
 
+  class CyclicBeanDependencyError < RuntimeError
+  end
+
   require "tsort"
   class BeanDefinitionRegistry
     include TSort
@@ -93,19 +96,26 @@ module Fabrique
       @defs[bean_name]
     end
 
-    def tsort_each_child(node, &block)
-      node.constructor_deps.map { |dep| @defs[dep] }.each(&block)
-    end
-
-    def tsort_each_node
-      @defs.each_value do |defn|
-        yield defn
+    def construction_path(bean_name)
+      begin
+        tsort.map { |p| get_definition(p) }
+      rescue TSort::Cyclic => e
+        raise CyclicBeanDependencyError.new(e.message.gsub(/topological sort failed/, "cyclic bean dependency error"))
       end
     end
 
-    def construction_path(bean_name)
-      tsort
-    end
+    private
+
+      def tsort_each_child(node, &block)
+        get_definition(node).constructor_deps.map { |dep| @defs[dep].name }.each(&block)
+      end
+
+      def tsort_each_node
+        @defs.each_value do |defn|
+          yield defn.name
+        end
+      end
+
   end
 
   class BeanFactory
@@ -129,9 +139,6 @@ module Fabrique
             property_injection(bean, @registry.get_definition(n))
           end
           @bean_reference_cache[bean_name]
-        rescue TSort::Cyclic => e
-          # TODO describe the cyclic dependency
-          raise "cyclic bean reference error detected #{e.inspect}"
         ensure
           @bean_reference_cache = nil
         end

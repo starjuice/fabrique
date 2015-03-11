@@ -41,8 +41,8 @@ Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bea
   expect(new_reference.object_id).to_not eql @bean.object_id
 end
 
-Then(/^I get a cyclic bean reference error when I request the "(.*?)" bean from the bean factory$/) do |bean_name|
-  expect { @bean_factory.get_bean(bean_name) }.to raise_error(/cyclic bean reference/)
+Then(/^I get a cyclic bean dependency error when I request the "(.*?)" bean from the bean factory$/) do |bean_name|
+  expect { @bean_factory.get_bean(bean_name) }.to raise_error(/cyclic bean dependency error/)
 end
 
 Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|

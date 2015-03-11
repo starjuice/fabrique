@@ -166,8 +166,8 @@ Feature: Bean Factory
             - elephant
       """
     When I request a bean factory for the application context
-    Then I get a cyclic bean reference error when I request the "left" bean from the bean factory
-    And I get a cyclic bean reference error when I request the "right" bean from the bean factory
+    Then I get a cyclic bean dependency error when I request the "left" bean from the bean factory
+    And I get a cyclic bean dependency error when I request the "right" bean from the bean factory
 
   Scenario: Cyclic bean property reference with non-cyclic constructor arg reference
 
