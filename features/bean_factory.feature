@@ -176,17 +176,22 @@ Feature: Bean Factory
       ---
       beans:
         left:
-          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
-          properties:
-            shape: {bean: right}
-        right:
           class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
           constructor_args:
+            shape: {bean: middle}
+        middle:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+          constructor_args:
+            shape: {bean: right}
+        right:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          properties:
             shape: {bean: left}
       """
     When I request a bean factory for the application context
     And I request the "left" bean from the bean factory
-    Then the "left" bean has "shape" set to the "right" bean
+    Then the "left" bean has "shape" set to the "middle" bean
+    And the "middle" bean has "shape" set to the "right" bean
     And the "right" bean has "shape" set to the "left" bean
 
   Scenario: Singleton bean (default
