@@ -11,7 +11,7 @@ module Fabrique
       @scope = defn["scope"] || "singleton"
       @factory_method = defn["factory_method"] || "new"
       @constructor_args = formalize_properties(defn["constructor_args"] || [])
-      @properties = formalize_properties(defn["properties"] || [])
+      @properties = formalize_properties(defn["properties"] || {})
     end
 
     def type
