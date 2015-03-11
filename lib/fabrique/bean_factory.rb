@@ -1,72 +1,144 @@
 module Fabrique
 
+  class BeanDefinition
+    attr_reader :constructor_args, :factory_method, :name, :properties, :scope
+
+    def initialize(defn, name = nil)
+      @name = defn["name"] || name or raise ArgumentError.new("missing name")
+      @type_name = defn["class"] or raise ArgumentError.new("missing class")
+      @scope = defn["scope"] || "singleton"
+      @factory_method = defn["factory_method"] || "new"
+      @constructor_args = formalize_properties(defn["constructor_args"] || [])
+      @properties = formalize_properties(defn["properties"] || [])
+    end
+
+    def type
+      @type_name.is_a?(Module) ? @type_name : Module.const_get(@type_name)
+    end
+
+    def singleton?
+      @scope == "singleton"
+    end
+
+    private
+
+      def formalize_properties(props)
+        if props.respond_to?(:keys)
+          props.inject({}) { |m, (k, v)| m[k] = formalize_value(v); m }
+        else
+          props.map { |v| formalize_value(v) }
+        end
+      end
+
+      def formalize_value(v)
+        v.is_a?(BeanPropertyDefinition) ? v : BeanPropertyDefinition.new(v)
+      end
+
+  end
+
+  class BeanPropertyDefinition
+
+    attr_reader :bean, :value
+
+    def initialize(defn)
+      if defn.respond_to?(:keys)
+        @bean = defn["bean"]
+        @value = derive_value(defn["type"], defn["value"]) unless bean_reference?
+      else
+        @value = defn
+      end
+    end
+
+    def bean_reference?
+      !@bean.nil?
+    end
+
+    private
+
+      def derive_value(type, value)
+        case type
+        when "String"
+          value.to_s
+        when "Integer"
+          value.to_i
+        when "Float"
+          value.to_f
+        else
+          raise TypeError.new("unknown bean property type #{type}")
+        end
+      end
+
+  end
+
   class BeanFactory
 
     # TODO Take a BeanDefinitionRegistry
-    def initialize(bean_config)
-      @cfg = bean_config
+    def initialize(config)
+      @config = config
       @singletons = {}
+      @semaphore = Mutex.new
     end
 
     def get_bean(bean_name)
-      defn = get_bean_definition(bean_name)
-      case (defn["scope"] || "singleton")
-      when "prototype"
-        build_bean(defn)
-      when "singleton"
-        @singletons[bean_name] ||= build_bean(defn)
+      begin
+        @bean_reference_cache = {}
+        get_bean_unsynchronized(bean_name)
+      rescue SystemStackError
+        # TODO Introduce cyclic bean reference detection
+        raise "cyclic bean reference error detected"
+      ensure
+        @bean_reference_cache = nil
       end
     end
 
     private
 
       def get_bean_definition(bean_name)
-        @cfg["beans"][bean_name]
+        BeanDefinition.new(@config["beans"][bean_name], bean_name)
+      end
+
+      def get_bean_unsynchronized(bean_name)
+        defn = get_bean_definition(bean_name)
+        if defn.singleton?
+          @singletons[bean_name] ||= build_bean(defn)
+        else
+          build_bean(defn)
+        end
       end
 
       def build_bean(defn)
-        type_name = defn["class"]
-        type = Module.const_get(type_name)
-        arguments = defn["constructor_args"] #? || []
-        factory_method = defn["factory_method"] || "new"
-        if factory_method == "itself"
+        if defn.factory_method == "itself"
           # Support RUBY_VERSION < 2.2.0 (missing Kernel#itself)
-          type
+          defn.type
         else
-          bean = if arguments.respond_to?(:keys)
-            arguments = arguments.inject({}) { |m, (k, v)| m[k.intern] = resolve_value(v); m }
-            type.send(factory_method, arguments)
-          else
-            arguments = arguments.map { |v| resolve_value(v) } if arguments.respond_to?(:map)
-            type.send(factory_method, *arguments)
-          end
-          bean.tap do |b|
-            properties = defn["properties"] || []
-            properties.each do |k, v|
-              b.send("#{k}=", resolve_value(v))
-            end
+          bean = @bean_reference_cache[defn.name] ||= constructor_injection(defn)
+          property_injection(bean, defn)
+        end
+      end
+
+      def constructor_injection(defn)
+        if defn.constructor_args.respond_to?(:keys)
+          args = defn.constructor_args.inject({}) { |m, (k, v)| m[k.intern] = resolve_bean_reference(v); m }
+          defn.type.send(defn.factory_method, args)
+        else
+          args = defn.constructor_args.map { |v| resolve_bean_reference(v) }
+          defn.type.send(defn.factory_method, *args)
+        end
+      end
+
+      def property_injection(bean, defn)
+        bean.tap do |b|
+          defn.properties.each do |k, v|
+            b.send("#{k}=", resolve_bean_reference(v))
           end
         end
       end
 
-      def resolve_value(v)
-        if v.respond_to?(:keys)
-          if v["bean"]
-            get_bean(v["bean"])
-          else
-            type = v["type"]
-            v = v["value"]
-            case type
-            when "String"
-              v.to_s
-            when "Integer"
-              v.to_i
-            when "Float"
-              v.to_f
-            end
-          end
+      def resolve_bean_reference(v)
+        if v.bean_reference?
+          @bean_reference_cache[v.bean] ||= get_bean_unsynchronized(v.bean)
         else
-          v
+          v.value
         end
       end
 

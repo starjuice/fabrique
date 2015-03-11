@@ -1,6 +1,6 @@
 require "yaml"
 
-Given(/^I have a YAML application context:$/) do |string|
+Given(/^I have a YAML application context definition:$/) do |string|
   @application_context = YAML.load(string)
 end
 
@@ -39,4 +39,8 @@ end
 Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bean_name|
   new_reference = @bean_factory.get_bean(bean_name)
   expect(new_reference.object_id).to_not eql @bean.object_id
+end
+
+Then(/^I get a cyclic bean reference error when I request the "(.*?)" bean from the bean factory$/) do |bean_name|
+  expect { @bean_factory.get_bean(bean_name) }.to raise_error(/cyclic bean reference/)
 end

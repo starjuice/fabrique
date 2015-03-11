@@ -7,7 +7,7 @@ Feature: Bean Factory
 
   Scenario: Simple object with default constructor
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -22,7 +22,7 @@ Feature: Bean Factory
 
   Scenario: Simple object with positional argument constructor
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -41,7 +41,7 @@ Feature: Bean Factory
 
   Scenario: Simple object with keyword argument constructor
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -61,7 +61,7 @@ Feature: Bean Factory
 
   Scenario: Simple object with hash properties constructor
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -80,7 +80,7 @@ Feature: Bean Factory
 
   Scenario: Module by identity
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -96,7 +96,7 @@ Feature: Bean Factory
 
   Scenario: Bean reference
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -118,9 +118,72 @@ Feature: Bean Factory
     Then the "parent" bean has "shape" set to the "child" bean
     And the "child" bean has "shape" set to "poop"
 
+  Scenario: Cyclic bean property reference
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+        left:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          properties:
+            shape: {bean: right}
+        right:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          properties:
+            shape: {bean: left}
+      """
+    When I request a bean factory for the application context
+    And I request the "left" bean from the bean factory
+    Then the "left" bean has "shape" set to the "right" bean
+    And the "right" bean has "shape" set to the "left" bean
+
+  Scenario: Cyclic bean constructor arg reference
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+        left:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          constructor_args:
+            - {bean: right}
+            - red
+            - dot
+        right:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+          constructor_args:
+            - {bean: left}
+            - purple
+            - elephant
+      """
+    When I request a bean factory for the application context
+    Then I get a cyclic bean reference error when I request the "left" bean from the bean factory
+    And I get a cyclic bean reference error when I request the "right" bean from the bean factory
+
+  Scenario: Cyclic bean property reference with non-cyclic constructor arg reference
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+        left:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+          properties:
+            shape: {bean: right}
+        right:
+          class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+          constructor_args:
+            shape: {bean: left}
+      """
+    When I request a bean factory for the application context
+    And I request the "left" bean from the bean factory
+    Then the "left" bean has "shape" set to the "right" bean
+    And the "right" bean has "shape" set to the "left" bean
+
   Scenario: Singleton bean (default
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -134,7 +197,7 @@ Feature: Bean Factory
 
   Scenario: Prototype bean
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -148,7 +211,7 @@ Feature: Bean Factory
 
   Scenario: Setter injection
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -167,7 +230,7 @@ Feature: Bean Factory
 
   Scenario: Constructor argument type
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
@@ -186,7 +249,7 @@ Feature: Bean Factory
 
   Scenario: Property argument type
 
-    Given I have a YAML application context:
+    Given I have a YAML application context definition:
       """
       ---
       beans:
