@@ -1,3 +1,5 @@
+require "thread"
+
 module Fabrique
 
   class BeanDefinition
@@ -80,14 +82,16 @@ module Fabrique
     end
 
     def get_bean(bean_name)
-      begin
-        @bean_reference_cache = {}
-        get_bean_unsynchronized(bean_name)
-      rescue SystemStackError
-        # TODO Introduce cyclic bean reference detection
-        raise "cyclic bean reference error detected"
-      ensure
-        @bean_reference_cache = nil
+      @semaphore.synchronize do
+        begin
+          @bean_reference_cache = {}
+          get_bean_unsynchronized(bean_name)
+        rescue SystemStackError
+          # TODO Introduce cyclic bean reference detection
+          raise "cyclic bean reference error detected"
+        ensure
+          @bean_reference_cache = nil
+        end
       end
     end
 
