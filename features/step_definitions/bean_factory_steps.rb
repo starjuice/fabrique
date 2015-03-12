@@ -1,7 +1,7 @@
 require "yaml"
 
 Given(/^I have a YAML application context definition:$/) do |string|
-  @application_context = YAML.load(string)
+  @application_context = Fabrique::BeanContextYamlParser.parse(string)
 end
 
 When(/^I request a bean factory for the application context$/) do
@@ -18,6 +18,11 @@ end
 
 Then(/^the bean has "(.*?)" that is the Integer "(.*?)"$/) do |attr, int_value|
   expect(@bean.send(attr)).to eql int_value.to_i
+end
+
+Then(/^the "(.*?)" bean has "(.*?)" that is the Integer (\d+)$/) do |bean_name, attr, int_value|
+  bean = @bean_factory.get_bean(bean_name)
+  expect(bean.send(attr)).to eql int_value.to_i
 end
 
 Then(/^the "(.*?)" bean has "(.*?)" set to the "(.*?)" bean$/) do |parent, attr, child|
@@ -41,8 +46,8 @@ Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bea
   expect(new_reference.object_id).to_not eql @bean.object_id
 end
 
-Then(/^I get a cyclic bean dependency error when I request the "(.*?)" bean from the bean factory$/) do |bean_name|
-  expect { @bean_factory.get_bean(bean_name) }.to raise_error(/cyclic bean dependency error/)
+Then(/^I get a cyclic bean dependency error when I request a bean factory for the application context$/) do
+  expect { Fabrique::BeanFactory.new(@application_context) }.to raise_error(/cyclic bean dependency error/)
 end
 
 Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|
