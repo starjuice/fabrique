@@ -32,20 +32,27 @@ module Fabrique
           return singleton
         end
 
+        bean = constructor_injection(defn)
+        property_injection(bean, defn)
+        if defn.singleton?
+          @singletons[bean_name] = bean
+        end
+        bean
+      end
+
+      def constructor_injection(defn)
         args = resolve_bean_references(defn.constructor_args)
         if args.respond_to?(:keys)
           bean = defn.type.send(defn.factory_method, args)
         else
           bean = defn.type.send(defn.factory_method, *args)
         end
+      end
 
+      def property_injection(bean, defn)
         bean.tap do |b|
           defn.properties.each do |k, v|
             b.send("#{k}=", resolve_bean_references(v))
-          end
-
-          if defn.singleton?
-            @singletons[bean_name] = bean
           end
         end
       end
