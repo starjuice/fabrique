@@ -10,8 +10,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
@@ -26,8 +26,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
@@ -46,8 +46,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
         constructor_args:
@@ -67,8 +67,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
         constructor_args:
@@ -87,8 +87,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: my_module
         class: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
         factory_method: itself
@@ -104,30 +104,30 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: customer_repository
         class: Fabrique::Test::Fixtures::Repository::CustomerRepository
         constructor_args:
           - !!bean/ref store
           - !!bean/ref customer_data_mapper
-      - !!bean
+      -
         id: product_repository
         class: Fabrique::Test::Fixtures::Repository::ProductRepository
         constructor_args:
           store: !!bean/ref store
           data_mapper: !!bean/ref product_data_mapper
-      - !!bean
+      -
         id: store
         class: Fabrique::Test::Fixtures::Repository::MysqlStore
         constructor_args:
           host: localhost
           port: 3306
-      - !!bean
+      -
         id: customer_data_mapper
         class: Fabrique::Test::Fixtures::Repository::CustomerDataMapper
         scope: prototype
-      - !!bean
+      -
         id: product_data_mapper
         class: Fabrique::Test::Fixtures::Repository::ProductDataMapper
         scope: prototype
@@ -141,13 +141,13 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
           shape: !!bean/ref right
-      - !!bean
+      -
         id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
@@ -160,15 +160,15 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
           - !!bean/ref right
           - red
           - dot
-      - !!bean
+      -
         id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
@@ -183,18 +183,18 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
         constructor_args:
           shape: !!bean/ref middle
-      - !!bean
+      -
         id: middle
         class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
         constructor_args:
           shape: !!bean/ref right
-      - !!bean
+      -
         id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
@@ -207,15 +207,15 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: disco_cube
         class: Fabrique::Test::Fixtures::OpenGL::Object
         constructor_args:
           - glittering
           - :mesh: !!bean/ref cube_mesh
             :scale: 10
-      - !!bean
+      -
         id: cube_mesh
         class: Fabrique::Test::Fixtures::OpenGL::Mesh
         constructor_args:
@@ -231,8 +231,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         scope: singleton
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
@@ -246,8 +246,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         scope: prototype
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
@@ -261,8 +261,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
@@ -281,8 +281,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
@@ -301,8 +301,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      !!beans
-      - !!bean
+      beans:
+      -
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:

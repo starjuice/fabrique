@@ -19,8 +19,21 @@ module Fabrique
 
   class BeanContextYamlParser
 
-    def self.parse(yaml)
-      YAML.load(yaml)
+    def self.parse(s)
+      yaml = YAML.load(s)
+      if yaml.respond_to?(:keys) and yaml["beans"]
+        beans = yaml["beans"]
+      else
+        raise "YAML contains no top-level beans node"
+      end
+
+      if beans.is_a?(BeanDefinitionRegistry)
+        beans
+      elsif beans.is_a?(Array)
+        BeanDefinitionRegistry.new(beans)
+      else
+        raise "YAML top-level beans node must be an Array or a #{BeanDefinitionRegistry}"
+      end
     end
 
   end

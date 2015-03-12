@@ -7,7 +7,7 @@ module Fabrique
     include TSort
 
     def initialize(definitions)
-      @defs = definitions
+      @defs = definitions.map { |d| d.is_a?(BeanDefinition) ? d : BeanDefinition.new(d) }
     end
 
     def get_definition(bean_name)
