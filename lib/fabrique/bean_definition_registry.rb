@@ -1,4 +1,5 @@
 require "tsort"
+require_relative "bean_definition"
 require_relative "cyclic_bean_dependency_error"
 
 module Fabrique
@@ -16,7 +17,7 @@ module Fabrique
 
     def validate!
       begin
-        $stderr.puts "DEBUG: #{tsort.join(" -> ")}}"
+        tsort
       rescue TSort::Cyclic => e
         raise CyclicBeanDependencyError.new(e.message.gsub(/topological sort failed/, "cyclic bean dependency error"))
       end

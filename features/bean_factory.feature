@@ -10,8 +10,8 @@ Feature: Bean Factory
     Given I have a YAML application context definition:
       """
       ---
-      beans:
-      -
+      beans: !beans
+      - !bean
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
@@ -27,8 +27,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
             - small
@@ -47,8 +46,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
         constructor_args:
           size: large
@@ -68,8 +66,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPropertiesHashConstructor
         constructor_args:
           size: tiny
@@ -88,8 +85,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: my_module
+      - id: my_module
         class: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
         factory_method: itself
       """
@@ -105,30 +101,25 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: customer_repository
+      - id: customer_repository
         class: Fabrique::Test::Fixtures::Repository::CustomerRepository
         constructor_args:
-          - !!bean/ref store
-          - !!bean/ref customer_data_mapper
-      -
-        id: product_repository
+          - !bean/ref store
+          - !bean/ref customer_data_mapper
+      - id: product_repository
         class: Fabrique::Test::Fixtures::Repository::ProductRepository
         constructor_args:
-          store: !!bean/ref store
-          data_mapper: !!bean/ref product_data_mapper
-      -
-        id: store
+          store: !bean/ref store
+          data_mapper: !bean/ref product_data_mapper
+      - id: store
         class: Fabrique::Test::Fixtures::Repository::MysqlStore
         constructor_args:
           host: localhost
           port: 3306
-      -
-        id: customer_data_mapper
+      - id: customer_data_mapper
         class: Fabrique::Test::Fixtures::Repository::CustomerDataMapper
         scope: prototype
-      -
-        id: product_data_mapper
+      - id: product_data_mapper
         class: Fabrique::Test::Fixtures::Repository::ProductDataMapper
         scope: prototype
       """
@@ -142,16 +133,14 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: left
+      - id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
-          shape: !!bean/ref right
-      -
-        id: right
+          shape: !bean/ref right
+      - id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
-          shape: !!bean/ref left
+          shape: !bean/ref left
       """
     Then I get a cyclic bean dependency error when I request a bean factory for the application context
 
@@ -161,18 +150,16 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: left
+      - id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
-          - !!bean/ref right
+          - !bean/ref right
           - red
           - dot
-      -
-        id: right
+      - id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
-          - !!bean/ref left
+          - !bean/ref left
           - purple
           - elephant
       """
@@ -184,21 +171,18 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: left
+      - id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
         constructor_args:
-          shape: !!bean/ref middle
-      -
-        id: middle
+          shape: !bean/ref middle
+      - id: middle
         class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
         constructor_args:
-          shape: !!bean/ref right
-      -
-        id: right
+          shape: !bean/ref right
+      - id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
-          shape: !!bean/ref left
+          shape: !bean/ref left
       """
     Then I get a cyclic bean dependency error when I request a bean factory for the application context
 
@@ -208,15 +192,13 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: disco_cube
+      - id: disco_cube
         class: Fabrique::Test::Fixtures::OpenGL::Object
         constructor_args:
           - glittering
-          - :mesh: !!bean/ref cube_mesh
+          - :mesh: !bean/ref cube_mesh
             :scale: 10
-      -
-        id: cube_mesh
+      - id: cube_mesh
         class: Fabrique::Test::Fixtures::OpenGL::Mesh
         constructor_args:
           - [[0, 0, 0],[1, 0, 0],[1, 0, 1],[0, 0, 1],[0, 1, 0],[1, 1, 0],[1, 1, 1],[0, 1, 1]]
@@ -232,8 +214,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         scope: singleton
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
@@ -247,8 +228,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         scope: prototype
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
@@ -262,8 +242,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
           size: large
@@ -282,8 +261,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
           - infinite
@@ -302,8 +280,7 @@ Feature: Bean Factory
       """
       ---
       beans:
-      -
-        id: simple_object
+      - id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
           size: infinite

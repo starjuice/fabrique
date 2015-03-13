@@ -47,7 +47,7 @@ Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bea
 end
 
 Then(/^I get a cyclic bean dependency error when I request a bean factory for the application context$/) do
-  expect { Fabrique::BeanFactory.new(@application_context) }.to raise_error(/cyclic bean dependency error/)
+  expect { Fabrique::BeanFactory.new(@application_context) }.to raise_error(Fabrique::CyclicBeanDependencyError, /cyclic bean dependency error/)
 end
 
 Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|
