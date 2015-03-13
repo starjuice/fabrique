@@ -1,11 +1,20 @@
 require "yaml"
 
+After do
+  if defined?(@tmpfile) and File.exists?(@tmpfile)
+    File.unlink(@tmpfile)
+  end
+end
+
 Given(/^I have a YAML application context definition:$/) do |string|
-  @application_context = Fabrique::BeanContextYamlParser.parse(string)
+  Tempfile.open('fabrique') do |f|
+    @tmpfile = f.path
+    f.write(string)
+  end
 end
 
 When(/^I request a bean factory for the application context$/) do
-  @bean_factory = Fabrique::BeanFactory.new(@application_context)
+  @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile)
 end
 
 When(/^I request the "(.*?)" bean from the bean factory$/) do |bean_name|
@@ -47,7 +56,7 @@ Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bea
 end
 
 Then(/^I get a cyclic bean dependency error when I request a bean factory for the application context$/) do
-  expect { Fabrique::BeanFactory.new(@application_context) }.to raise_error(Fabrique::CyclicBeanDependencyError, /cyclic bean dependency error/)
+  expect { Fabrique::YamlBeanFactory.new(@tmpfile) }.to raise_error(Fabrique::CyclicBeanDependencyError, /cyclic bean dependency error/)
 end
 
 Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|

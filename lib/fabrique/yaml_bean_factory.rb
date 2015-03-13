@@ -1,6 +1,7 @@
 require "yaml"
 require_relative "bean_definition_registry"
 require_relative "bean_definition"
+require_relative "bean_factory"
 require_relative "bean_reference"
 
 module Fabrique
@@ -17,20 +18,20 @@ module Fabrique
     BeanReference.new(value)
   end
 
-  class BeanContextYamlParser
+  class YamlBeanFactory < BeanFactory
 
-    def self.parse(s)
-      yaml = YAML.load(s)
-      if yaml.respond_to?(:keys) and yaml["beans"]
-        beans = yaml["beans"]
+    def initialize(pathname)
+      data = YAML.load_file(pathname)
+      if data.respond_to?(:keys) and data["beans"]
+        beans = data["beans"]
       else
         raise "YAML contains no top-level beans node"
       end
 
       if beans.is_a?(BeanDefinitionRegistry)
-        beans
+        super(beans)
       elsif beans.is_a?(Array)
-        BeanDefinitionRegistry.new(beans)
+        super(BeanDefinitionRegistry.new(beans))
       else
         raise "YAML top-level beans node must be an Array or a #{BeanDefinitionRegistry}"
       end
