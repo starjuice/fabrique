@@ -1,4 +1,4 @@
-require "yaml"
+require "tempfile"
 
 After do
   if defined?(@tmpfile) and File.exists?(@tmpfile)
