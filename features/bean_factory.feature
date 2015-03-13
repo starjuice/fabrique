@@ -230,6 +230,31 @@ Feature: Bean Factory
     And I request the "outer" bean from the bean factory
     Then the bean's "shape" is an object with "shape" set to "elephant"
 
+  Scenario: Bean property reference
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: left
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - !bean/property_ref right.size
+          - !bean/property_ref right.color
+          - !bean/property_ref right.shape
+      - id: right
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - tiny
+          - purple
+          - elephant
+      """
+    When I request a bean factory for the application context
+    And I request the "left" bean from the bean factory
+    Then the bean has "size" set to "tiny"
+    And the bean has "color" set to "purple"
+    And the bean has "shape" set to "elephant"
+
   Scenario: Singleton bean (default)
 
     Given I have a YAML application context definition:

@@ -35,7 +35,7 @@ module Fabrique
           data.each do |o|
             dependencies_of(o, acc)
           end
-        elsif data.is_a?(BeanReference)
+        elsif data.is_a?(BeanReference) or data.is_a?(BeanPropertyReference)
           acc << data
         end
         acc

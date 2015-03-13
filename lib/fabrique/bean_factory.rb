@@ -75,6 +75,8 @@ module Fabrique
           get_bean_by_definition(data)
         elsif data.is_a?(BeanReference)
           get_bean_unsynchronized(data.bean)
+        elsif data.is_a?(BeanPropertyReference)
+          get_bean_unsynchronized(data.bean).send(data.property)
         else
           data
         end
