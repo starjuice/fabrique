@@ -23,21 +23,25 @@ module Fabrique
       def get_bean_unsynchronized(bean_name)
         defn = @registry.get_definition(bean_name)
 
+        if defn.singleton? and singleton = @singletons[bean_name]
+          return singleton
+        end
+
+        get_bean_by_definition(defn).tap do |bean|
+          if defn.singleton?
+            @singletons[bean_name] = bean
+          end
+        end
+      end
+
+      def get_bean_by_definition(defn)
         if defn.factory_method == "itself"
           # Support RUBY_VERSION < 2.2.0 (missing Kernel#itself)
           return defn.type
         end
 
-        if defn.singleton? and singleton = @singletons[bean_name]
-          return singleton
-        end
-
         bean = constructor_injection(defn)
         property_injection(bean, defn)
-        if defn.singleton?
-          @singletons[bean_name] = bean
-        end
-        bean
       end
 
       def constructor_injection(defn)
@@ -67,6 +71,8 @@ module Fabrique
           data.inject([]) do |acc, v|
             acc << resolve_bean_references(v)
           end
+        elsif data.is_a?(BeanDefinition)
+          get_bean_by_definition(data)
         elsif data.is_a?(BeanReference)
           get_bean_unsynchronized(data.bean)
         else

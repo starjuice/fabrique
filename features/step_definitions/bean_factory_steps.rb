@@ -25,6 +25,10 @@ Then(/^the bean has "(.*?)" set to "(.*?)"$/) do |attr, value|
   expect(@bean.send(attr)).to eql value
 end
 
+Then(/^the bean's "(.*?)" is an object with "(.*?)" set to "(.*?)"$/) do |attr, child_attr, value|
+  expect(@bean.send(attr).send(child_attr)).to eql value
+end
+
 Then(/^the bean has "(.*?)" that is the Integer "(.*?)"$/) do |attr, int_value|
   expect(@bean.send(attr)).to eql int_value.to_i
 end

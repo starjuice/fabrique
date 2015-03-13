@@ -208,6 +208,28 @@ Feature: Bean Factory
     Then the "disco_cube" bean has "mesh" set to the "cube_mesh" bean
     And the "disco_cube" bean has "scale" that is the Integer 10
 
+  Scenario: Inner bean
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: outer
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - large
+          - red
+          - !bean
+            class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+            constructor_args:
+              - infinite
+              - invisible
+              - elephant
+      """
+    When I request a bean factory for the application context
+    And I request the "outer" bean from the bean factory
+    Then the bean's "shape" is an object with "shape" set to "elephant"
+
   Scenario: Singleton bean (default)
 
     Given I have a YAML application context definition:
