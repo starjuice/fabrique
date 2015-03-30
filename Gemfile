@@ -4,6 +4,6 @@ source 'https://rubygems.org'
 gemspec
 
 group :devtools do
-  gem "guard-cucumber", "~> 1.5"
-  gem "byebug", "~> 3.5"
+  gem "guard-cucumber", "~> 1.6"
+  gem "byebug", "~> 4.0"
 end
