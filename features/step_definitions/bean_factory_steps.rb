@@ -1,20 +1,19 @@
 require "tempfile"
 
 After do
-  if defined?(@tmpfile) and File.exists?(@tmpfile)
-    File.unlink(@tmpfile)
+  if defined?(@tmpfile) and File.exists?(@tmpfile.path)
+    @tmpfile.unlink
   end
 end
 
 Given(/^I have a YAML application context definition:$/) do |string|
-  Tempfile.open('fabrique') do |f|
-    @tmpfile = f.path
-    f.write(string)
-  end
+  @tmpfile = Tempfile.open('fabrique')
+  @tmpfile.write string
+  @tmpfile.close
 end
 
 When(/^I request a bean factory for the application context$/) do
-  @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile)
+  @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile.path)
 end
 
 When(/^I request the "(.*?)" bean from the bean factory$/) do |bean_name|
@@ -60,7 +59,7 @@ Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bea
 end
 
 Then(/^I get a cyclic bean dependency error when I request a bean factory for the application context$/) do
-  expect { Fabrique::YamlBeanFactory.new(@tmpfile) }.to raise_error(Fabrique::CyclicBeanDependencyError, /cyclic bean dependency error/)
+  expect { Fabrique::YamlBeanFactory.new(@tmpfile.path) }.to raise_error(Fabrique::CyclicBeanDependencyError, /cyclic bean dependency error/)
 end
 
 Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|
