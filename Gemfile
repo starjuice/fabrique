@@ -5,5 +5,5 @@ gemspec
 
 group :devtools do
   gem "guard-cucumber", "~> 1.6"
-  gem "byebug", "~> 4.0"
+  gem "byebug", "~> 6.0"
 end
