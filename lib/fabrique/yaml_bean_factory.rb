@@ -25,18 +25,33 @@ module Fabrique
 
   class YamlBeanFactory < BeanFactory
 
-    def initialize(pathname)
-      data = YAML.load_file(pathname)
-      if data.respond_to?(:keys) and data["beans"]
-        beans = data["beans"]
+    def initialize(path_or_string)
+      super bean_definition_registry beans_node load_yaml path_or_string
+    end
+
+    private
+
+    def load_yaml(path_or_string)
+      if path_or_string.is_a?(String) and path_or_string =~ /\A---\r?\n/
+        YAML.load(path_or_string)
+      else
+        YAML.load_file(path_or_string)
+      end
+    end
+
+    def beans_node(parsed_yaml)
+      if parsed_yaml.respond_to?(:keys) and parsed_yaml["beans"]
+        parsed_yaml["beans"]
       else
         raise "YAML contains no top-level beans node"
       end
+    end
 
+    def bean_definition_registry(beans)
       if beans.is_a?(BeanDefinitionRegistry)
-        super(beans)
+        beans
       elsif beans.is_a?(Array)
-        super(BeanDefinitionRegistry.new(beans))
+        BeanDefinitionRegistry.new(beans)
       else
         raise "YAML top-level beans node must be an Array or a #{BeanDefinitionRegistry}"
       end
