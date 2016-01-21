@@ -120,7 +120,7 @@ end
 require "fabrique"
 
 Before do |scenario|
-  if scenario.source_tags.any? { |tag| tag.name == "@plugin_registry" }
+  if scenario.tags.any? { |tag| tag.name == "@plugin_registry" }
     @test = PluginRegistryTestRunner.new( -> {Fabrique::PluginRegistry.new("Test plugin registry")})
   end
 end
