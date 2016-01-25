@@ -6,6 +6,17 @@ module Fabrique
 
       module Constructors
 
+        class FactoryWithCreateMethod
+
+          def initialize(*args)
+          end
+
+          def create
+            ClassWithPositionalArgumentConstructor.new("factory size", "factory color", "factory shape")
+          end
+
+        end
+
         class ClassWithProperties
 
           DEFAULT_SIZE = "default size" unless defined?(DEFAULT_SIZE)

@@ -6,7 +6,7 @@ module Fabrique
     def initialize(attrs = {})
       @id = attrs["id"]
       type_name = attrs["class"]
-      @type = type_name.is_a?(Module) ? type_name : Module.const_get(type_name)
+      @type = (type_name.is_a?(BeanReference) or type_name.is_a?(Module)) ? type_name : Module.const_get(type_name)
       @constructor_args = attrs["constructor_args"] || []
       @constructor_args = keywordify(@constructor_args) if @constructor_args.is_a?(Hash)
       @properties = attrs["properties"] || {}
@@ -15,7 +15,7 @@ module Fabrique
     end
 
     def dependencies
-      (accumulate_dependencies(@constructor_args) + accumulate_dependencies(@properties)).uniq
+      (accumulate_dependencies(@type) + accumulate_dependencies(@constructor_args) + accumulate_dependencies(@properties)).uniq
     end
 
     def singleton?

@@ -36,20 +36,28 @@ module Fabrique
 
       def get_bean_by_definition(defn)
         if defn.factory_method == "itself"
-          # Support RUBY_VERSION < 2.2.0 (missing Kernel#itself)
-          return defn.type
+          return get_factory(defn)
         end
 
         bean = constructor_injection(defn)
         property_injection(bean, defn)
       end
 
+      def get_factory(defn)
+        if defn.type.is_a?(BeanReference)
+          get_bean_unsynchronized(defn.type.bean)
+        else
+          defn.type
+        end
+      end
+
       def constructor_injection(defn)
         args = resolve_bean_references(defn.constructor_args)
+        factory = get_factory(defn)
         if args.respond_to?(:keys)
-          bean = defn.type.send(defn.factory_method, args)
+          bean = factory.send(defn.factory_method, args)
         else
-          bean = defn.type.send(defn.factory_method, *args)
+          bean = factory.send(defn.factory_method, *args)
         end
       end
 

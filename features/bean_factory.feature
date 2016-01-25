@@ -79,6 +79,24 @@ Feature: Bean Factory
     And the bean has "color" set to "purple"
     And the bean has "shape" set to "elephant"
 
+  Scenario: Factory method with bean reference as class
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: factory
+        class: Fabrique::Test::Fixtures::Constructors::FactoryWithCreateMethod
+      - id: created_object
+        class: !bean/ref factory
+        factory_method: create
+      """
+    When I request a bean factory for the application context
+    And I request the "created_object" bean from the bean factory
+    Then the bean has "size" set to "factory size"
+    And the bean has "color" set to "factory color"
+    And the bean has "shape" set to "factory shape"
+
   Scenario: Module by identity
 
     Given I have a YAML application context definition:
@@ -183,6 +201,22 @@ Feature: Bean Factory
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
           shape: !bean/ref left
+      """
+    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+
+  Scenario: Cyclic bean class reference
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: factory
+        class: Fabrique::Test::Fixtures::Constructors::FactoryWithCreateMethod
+        constructor_args:
+          - !bean/ref created_object
+      - id: created_object
+        class: !bean/ref factory
+        factory_method: create
       """
     Then I get a cyclic bean dependency error when I request a bean factory for the application context
 
