@@ -403,3 +403,22 @@ Feature: Bean Factory
     And the bean has "color" set to "invisible"
     And the bean has "shape" that is the Integer "42"
 
+  Scenario: Data bean
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: data
+        class: Fabrique::DataBean
+        constructor_args:
+        - size: small
+          color: red
+          shape: dot
+      """
+    When I request a bean factory for the application context
+    And I request the "data" bean from the bean factory
+    Then the bean has "size" set to "small"
+    And the bean has "color" set to "red"
+    And the bean has "shape" set to "dot"
+
