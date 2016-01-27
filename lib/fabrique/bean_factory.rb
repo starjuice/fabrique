@@ -27,11 +27,11 @@ module Fabrique
           return singleton
         end
 
-        get_bean_by_definition(defn).tap do |bean|
-          if defn.singleton?
-            @singletons[bean_name] = bean
-          end
+        bean = get_bean_by_definition(defn)
+        if defn.singleton?
+          @singletons[bean_name] = bean
         end
+        bean
       end
 
       def get_bean_by_definition(defn)
@@ -54,11 +54,10 @@ module Fabrique
       end
 
       def property_injection(bean, defn)
-        bean.tap do |b|
-          defn.properties.each do |k, v|
-            b.send("#{k}=", resolve_bean_references(v))
-          end
+        defn.properties.each do |k, v|
+          bean.send("#{k}=", resolve_bean_references(v))
         end
+        bean
       end
 
       def resolve_bean_references(data)
