@@ -289,6 +289,35 @@ Feature: Bean Factory
     And the bean has "color" set to "purple"
     And the bean has "shape" set to "elephant"
 
+  Scenario: Nested bean property reference
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: left
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - !bean/property_ref middle.object.size
+          - !bean/property_ref middle.object.color
+          - !bean/property_ref middle.object.shape
+      - id: middle
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+        properties:
+          object: !bean/ref right
+      - id: right
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - tiny
+          - purple
+          - elephant
+      """
+    When I request a bean factory for the application context
+    And I request the "left" bean from the bean factory
+    Then the bean has "size" set to "tiny"
+    And the bean has "color" set to "purple"
+    And the bean has "shape" set to "elephant"
+
   Scenario: Singleton bean (default)
 
     Given I have a YAML application context definition:

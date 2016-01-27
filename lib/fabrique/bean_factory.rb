@@ -84,11 +84,12 @@ module Fabrique
         elsif data.is_a?(BeanReference)
           get_bean_unsynchronized(data.bean)
         elsif data.is_a?(BeanPropertyReference)
-          get_bean_unsynchronized(data.bean).send(data.property)
+          data.resolve(get_bean_unsynchronized(data.bean))
         else
           data
         end
       end
+
   end
 
 end
