@@ -422,3 +422,21 @@ Feature: Bean Factory
     And the bean has "color" set to "red"
     And the bean has "shape" set to "dot"
 
+  Scenario: Gem
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sample
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.1"
+          require: sample
+        factory_method: itself
+      """
+    When I request a bean factory for the application context
+    And I request the "sample" bean from the bean factory
+    Then the bean has "version" set to "0.1.1"
+
