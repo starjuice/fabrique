@@ -422,7 +422,7 @@ Feature: Bean Factory
     And the bean has "color" set to "red"
     And the bean has "shape" set to "dot"
 
-  Scenario: Gem
+  Scenario: Gem loader
 
     Given I have a YAML application context definition:
       """
@@ -436,6 +436,7 @@ Feature: Bean Factory
           require: sample
         factory_method: itself
       """
+    And the "sample" gem is not installed
     When I request a bean factory for the application context
     And I request the "sample" bean from the bean factory
     Then the bean has "version" set to "0.1.1"

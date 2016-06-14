@@ -74,3 +74,7 @@ Then(/^the "(.*?)" and "(.*?)" beans each have their own "(.*?)"$/) do |bean1_na
   expect(bean1.send(own_property).object_id).to_not eql bean2.send(own_property).object_id
 end
 
+Given(/^the "(.*?)" gem is not installed$/) do |arg1|
+  require "rubygems/uninstaller"
+  Gem::Uninstaller.new("sample").uninstall
+end

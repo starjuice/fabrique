@@ -8,17 +8,13 @@ module Fabrique
       type_name = attrs["class"]
       if @gem = attrs["gem"]
         require "rubygems/dependency_installer"
-        if @gem["version"]
-          dep = Gem::Dependency.new(@gem["name"], @gem["version"])
-        else
-          dep = Gem::Dependency.new(@gem["name"])
-        end
+        dep = Gem::Dependency.new(@gem["name"], @gem["version"] || Gem::Requirement.default)
         specs = dep.matching_specs
         if specs.empty?
           $stderr.puts "DEBUG: installing #{dep.inspect}"
           set = Gem::RequestSet.new(dep)
           set.resolve
-          specs = set.install(Gem::DependencyInstaller::DEFAULT_OPTIONS)
+          specs = set.install(Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(document: []))
         end
         spec = specs.max_by(&:version)
         $stderr.puts "DEBUG: activating #{spec.inspect}"
