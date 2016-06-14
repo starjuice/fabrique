@@ -7,13 +7,13 @@ module Fabrique
       @id = attrs["id"]
       type_name = attrs["class"]
       if @gem = attrs["gem"]
-        require "rubygems/dependency_installer"
         dep = Gem::Dependency.new(@gem["name"], @gem["version"] || Gem::Requirement.default)
         specs = dep.matching_specs
         if specs.empty?
           $stderr.puts "DEBUG: installing #{dep.inspect}"
           set = Gem::RequestSet.new(dep)
           set.resolve
+          require "rubygems/dependency_installer"
           specs = set.install(Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(document: []))
         end
         spec = specs.max_by(&:version)
