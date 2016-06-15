@@ -6,22 +6,7 @@ module Fabrique
     def initialize(attrs = {})
       @id = attrs["id"]
       @type = attrs["class"]
-      @gem = attrs["gem"]
-=begin
-        dep = Gem::Dependency.new(@gem["name"], @gem["version"] || Gem::Requirement.default)
-        specs = dep.matching_specs
-        if specs.empty?
-          $stderr.puts "DEBUG: installing #{dep.inspect}"
-          set = Gem::RequestSet.new(dep)
-          set.resolve
-          require "rubygems/dependency_installer"
-          specs = set.install(Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(document: []))
-        end
-        spec = specs.max_by(&:version)
-        $stderr.puts "DEBUG: activating #{spec.inspect}"
-        spec.activate
-        require(@gem["require"] || spec.name)
-=end
+      @gem = GemDefinition.new(attrs["gem"]) if attrs["gem"]
       @constructor_args = attrs["constructor_args"] || []
       @constructor_args = keywordify(@constructor_args) if @constructor_args.is_a?(Hash)
       @properties = attrs["properties"] || {}

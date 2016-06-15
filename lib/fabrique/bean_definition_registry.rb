@@ -19,6 +19,10 @@ module Fabrique
       @defs
     end
 
+    def get_gem_definitions
+      @defs.collect(&:gem).compact
+    end
+
     def validate!
       tsort
     rescue TSort::Cyclic => e
