@@ -8,6 +8,7 @@ module Fabrique
     def initialize(registry)
       @registry = registry
       @registry.validate!
+      GemLoader.new(@registry.get_definitions).load_gems
       @singletons = {}
       @semaphore = Mutex.new
     end
