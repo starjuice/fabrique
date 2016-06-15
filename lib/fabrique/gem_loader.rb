@@ -4,14 +4,14 @@ module Fabrique
 
     def initialize(gem_definitions)
       @gem_defs = gem_definitions
+      deps = @gem_defs.collect(&:dependency)
+      @gem_set = Gem::RequestSet.new(*deps)
     end
 
     def load_gems
       require "rubygems/dependency_installer"
-      deps = @gem_defs.collect(&:dependency)
-      set = Gem::RequestSet.new(*deps)
-      set.resolve
-      specs = set.install(Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(document: []))
+      @gem_set.resolve
+      specs = @gem_set.install(Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(document: []))
       specs.each do |spec|
         spec.activate
       end

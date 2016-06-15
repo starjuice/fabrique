@@ -438,6 +438,7 @@ Feature: Bean Factory
       """
     And the "sample" gem is not installed
     When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
     And I request the "sample" bean from the bean factory
     Then the bean has "version" set to "0.1.1"
 
@@ -463,7 +464,8 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "sample" gem is not installed
-    Then I get a gem dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a gem dependency error when when I request that bean dependency gems be loaded
 
   Scenario: Gem loader install error
 
@@ -478,5 +480,6 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "sample" gem is not installed
-    Then I get a gem dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a gem dependency error when when I request that bean dependency gems be loaded
 

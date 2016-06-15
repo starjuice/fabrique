@@ -83,6 +83,11 @@ Given(/^the "(.*?)" gem is not installed$/) do |gem|
   end
 end
 
-Then(/^I get a gem dependency error when I request a bean factory for the application context$/) do
-  expect { Fabrique::YamlBeanFactory.new(@tmpfile.path) }.to raise_error(Fabrique::GemDependencyError)
+When(/^I request that bean dependency gems be loaded for the bean factory$/) do
+  @bean_factory.load_gem_dependencies
 end
+
+Then(/^I get a gem dependency error when when I request that bean dependency gems be loaded$/) do
+  expect { @bean_factory.load_gem_dependencies }.to raise_error(Fabrique::GemDependencyError)
+end
+

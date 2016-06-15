@@ -8,7 +8,7 @@ module Fabrique
     def initialize(registry)
       @registry = registry
       @registry.validate!
-      GemLoader.new(@registry.get_gem_definitions).load_gems
+      @gem_loader = GemLoader.new(@registry.get_gem_definitions)
       @singletons = {}
       @semaphore = Mutex.new
     end
@@ -17,6 +17,10 @@ module Fabrique
       @semaphore.synchronize do
         get_bean_unsynchronized(bean_name)
       end
+    end
+
+    def load_gem_dependencies
+      @gem_loader.load_gems
     end
 
     private
