@@ -23,6 +23,12 @@ module Fabrique
       @gem_loader.load_gems
     end
 
+    def to_h
+      @semaphore.synchronize do
+        @registry.get_definitions.map { |defn| [defn.id, get_bean_unsynchronized(defn.id)] }.to_h
+      end
+    end
+
     private
 
       def get_bean_unsynchronized(bean_name)

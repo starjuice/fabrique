@@ -489,3 +489,25 @@ Feature: Bean Factory
     And I request that bean dependency gems be loaded for the bean factory
     Then I get a gem dependency error
 
+  Scenario: #to_h
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans: !beans
+      - !bean
+        id: square_bean
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+        constructor_args:
+          shape: square
+      - !bean
+        id: round_bean
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+        constructor_args:
+          shape: round
+      """
+    When I request a bean factory for the application context
+    And I request a dictionary of all beans
+    Then the dictionary maps "square_bean" to the "square_bean" bean
+    And the dictionary maps "round_bean" to the "round_bean" bean
+

@@ -99,3 +99,10 @@ Then(/^I get a gem dependency error$/) do
   expect(@bean_factory_load_gem_dependencies_exception).to be_a Fabrique::GemDependencyError
 end
 
+When(/^I request a dictionary of all beans$/) do
+  @dictionary = @bean_factory.to_h
+end
+
+Then(/^the dictionary maps "([^"]*)" to the "([^"]*)" bean$/) do |dictionary_key, bean_name|
+  expect(@dictionary[dictionary_key]).to eql @bean_factory.get_bean(bean_name)
+end
