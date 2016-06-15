@@ -160,7 +160,8 @@ Feature: Bean Factory
         properties:
           shape: !bean/ref left
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean constructor arg reference
 
@@ -181,7 +182,8 @@ Feature: Bean Factory
           - purple
           - elephant
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean property reference with non-cyclic constructor arg reference
 
@@ -202,7 +204,8 @@ Feature: Bean Factory
         properties:
           shape: !bean/ref left
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean class reference
 
@@ -218,7 +221,8 @@ Feature: Bean Factory
         class: !bean/ref factory
         factory_method: create
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Nested bean references
 
@@ -465,7 +469,8 @@ Feature: Bean Factory
       """
     And the "sample" gem is not installed
     When I request a bean factory for the application context
-    Then I get a gem dependency error when when I request that bean dependency gems be loaded
+    And I request that bean dependency gems be loaded for the bean factory
+    Then I get a gem dependency error
 
   Scenario: Gem loader install error
 
@@ -481,5 +486,6 @@ Feature: Bean Factory
       """
     And the "sample" gem is not installed
     When I request a bean factory for the application context
-    Then I get a gem dependency error when when I request that bean dependency gems be loaded
+    And I request that bean dependency gems be loaded for the bean factory
+    Then I get a gem dependency error
 

@@ -13,7 +13,11 @@ Given(/^I have a YAML application context definition:$/) do |string|
 end
 
 When(/^I request a bean factory for the application context$/) do
-  @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile.path)
+  begin
+    @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile.path)
+  rescue Exception => e
+    @bean_factory_request_exception = e
+  end
 end
 
 When(/^I request the "(.*?)" bean from the bean factory$/) do |bean_name|
@@ -58,8 +62,8 @@ Then(/^I get a different object when I request the "(.*?)" bean again$/) do |bea
   expect(new_reference.object_id).to_not eql @bean.object_id
 end
 
-Then(/^I get a cyclic bean dependency error when I request a bean factory for the application context$/) do
-  expect { Fabrique::YamlBeanFactory.new(@tmpfile.path) }.to raise_error(Fabrique::CyclicBeanDependencyError, /cyclic bean dependency error/)
+Then(/^I get a cyclic bean dependency error$/) do
+  expect(@bean_factory_request_exception).to be_a Fabrique::CyclicBeanDependencyError
 end
 
 Then(/^the "(.*?)" and "(.*?)" beans share the same "(.*?)"$/) do |bean1_name, bean2_name, shared_property|
@@ -84,10 +88,14 @@ Given(/^the "(.*?)" gem is not installed$/) do |gem|
 end
 
 When(/^I request that bean dependency gems be loaded for the bean factory$/) do
-  @bean_factory.load_gem_dependencies
+  begin
+    @bean_factory.load_gem_dependencies
+  rescue Exception => e
+    @bean_factory_load_gem_dependencies_exception = e
+  end
 end
 
-Then(/^I get a gem dependency error when when I request that bean dependency gems be loaded$/) do
-  expect { @bean_factory.load_gem_dependencies }.to raise_error(Fabrique::GemDependencyError)
+Then(/^I get a gem dependency error$/) do
+  expect(@bean_factory_load_gem_dependencies_exception).to be_a Fabrique::GemDependencyError
 end
 
