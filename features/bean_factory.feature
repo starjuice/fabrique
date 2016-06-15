@@ -441,3 +441,42 @@ Feature: Bean Factory
     And I request the "sample" bean from the bean factory
     Then the bean has "version" set to "0.1.1"
 
+  Scenario: Gem loader version conflict
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sample
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.1"
+          require: sample
+        factory_method: itself
+      - id: conflicting_sample
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.0"
+          require: sample
+        factory_method: itself
+      """
+    And the "sample" gem is not installed
+    Then I get a gem dependency error when I request a bean factory for the application context
+
+  Scenario: Gem loader install error
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sample
+        class: Sample
+        gem:
+          name: nosuchgeminstallable
+        factory_method: itself
+      """
+    And the "sample" gem is not installed
+    Then I get a gem dependency error when I request a bean factory for the application context
+

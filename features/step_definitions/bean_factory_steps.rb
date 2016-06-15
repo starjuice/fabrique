@@ -82,3 +82,7 @@ Given(/^the "(.*?)" gem is not installed$/) do |gem|
     Gem::Uninstaller.new(spec).uninstall
   end
 end
+
+Then(/^I get a gem dependency error when I request a bean factory for the application context$/) do
+  expect { Fabrique::YamlBeanFactory.new(@tmpfile.path) }.to raise_error(Fabrique::GemDependencyError)
+end

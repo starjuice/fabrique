@@ -46,8 +46,10 @@ module Fabrique
       def get_factory(defn)
         if defn.type.is_a?(BeanReference)
           get_bean_unsynchronized(defn.type.bean)
-        else
+        elsif defn.type.is_a?(Module)
           defn.type
+        else
+          Module.const_get(defn.type)
         end
       end
 

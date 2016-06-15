@@ -1,12 +1,13 @@
 module Fabrique
 
   class BeanDefinition
-    attr_reader :constructor_args, :factory_method, :id, :properties, :type
+    attr_reader :constructor_args, :factory_method, :gem, :id, :properties, :type
 
     def initialize(attrs = {})
       @id = attrs["id"]
-      type_name = attrs["class"]
-      if @gem = attrs["gem"]
+      @type = attrs["class"]
+      @gem = attrs["gem"]
+=begin
         dep = Gem::Dependency.new(@gem["name"], @gem["version"] || Gem::Requirement.default)
         specs = dep.matching_specs
         if specs.empty?
@@ -20,8 +21,7 @@ module Fabrique
         $stderr.puts "DEBUG: activating #{spec.inspect}"
         spec.activate
         require(@gem["require"] || spec.name)
-      end
-      @type = (type_name.is_a?(BeanReference) or type_name.is_a?(Module)) ? type_name : Module.const_get(type_name)
+=end
       @constructor_args = attrs["constructor_args"] || []
       @constructor_args = keywordify(@constructor_args) if @constructor_args.is_a?(Hash)
       @properties = attrs["properties"] || {}
