@@ -1,12 +1,12 @@
 module Fabrique
 
   class BeanDefinition
-    attr_reader :constructor_args, :factory_method, :id, :properties, :type
+    attr_reader :constructor_args, :factory_method, :gem, :id, :properties, :type
 
     def initialize(attrs = {})
       @id = attrs["id"]
-      type_name = attrs["class"]
-      @type = (type_name.is_a?(BeanReference) or type_name.is_a?(Module)) ? type_name : Module.const_get(type_name)
+      @type = attrs["class"]
+      @gem = GemDefinition.new(attrs["gem"]) if attrs["gem"]
       @constructor_args = attrs["constructor_args"] || []
       @constructor_args = keywordify(@constructor_args) if @constructor_args.is_a?(Hash)
       @properties = attrs["properties"] || {}

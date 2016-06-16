@@ -160,7 +160,8 @@ Feature: Bean Factory
         properties:
           shape: !bean/ref left
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean constructor arg reference
 
@@ -181,7 +182,8 @@ Feature: Bean Factory
           - purple
           - elephant
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean property reference with non-cyclic constructor arg reference
 
@@ -202,7 +204,8 @@ Feature: Bean Factory
         properties:
           shape: !bean/ref left
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean class reference
 
@@ -218,7 +221,8 @@ Feature: Bean Factory
         class: !bean/ref factory
         factory_method: create
       """
-    Then I get a cyclic bean dependency error when I request a bean factory for the application context
+    When I request a bean factory for the application context
+    Then I get a cyclic bean dependency error
 
   Scenario: Nested bean references
 
@@ -421,4 +425,109 @@ Feature: Bean Factory
     Then the bean has "size" set to "small"
     And the bean has "color" set to "red"
     And the bean has "shape" set to "dot"
+
+  Scenario: Gem loader
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sample
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.1"
+          require: sample
+        factory_method: itself
+      """
+    And the "sample" gem is not installed
+    When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
+    And I request the "sample" bean from the bean factory
+    Then the bean has "version" set to "0.1.1"
+
+  Scenario: Gem loader with already-installed gem
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: local_only
+        class: LocalOnly
+        gem:
+          name: local_only
+          version: "= 0.1.0"
+          require: local_only
+        factory_method: itself
+      """
+    And the "local_only" gem is already installed
+    When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
+    And I request the "local_only" bean from the bean factory
+    Then the bean has "version" set to "0.1.0"
+
+  Scenario: Gem loader version conflict
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sample
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.1"
+          require: sample
+        factory_method: itself
+      - id: conflicting_sample
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.0"
+          require: sample
+        factory_method: itself
+      """
+    And the "sample" gem is not installed
+    When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
+    Then I get a gem dependency error
+
+  Scenario: Gem loader install error
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sample
+        class: Sample
+        gem:
+          name: nosuchgeminstallable
+        factory_method: itself
+      """
+    And the "sample" gem is not installed
+    When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
+    Then I get a gem dependency error
+
+  Scenario: #to_h
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans: !beans
+      - !bean
+        id: square_bean
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+        constructor_args:
+          shape: square
+      - !bean
+        id: round_bean
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithKeywordArgumentConstructor
+        constructor_args:
+          shape: round
+      """
+    When I request a bean factory for the application context
+    And I request a dictionary of all beans
+    Then the dictionary maps "square_bean" to the "square_bean" bean
+    And the dictionary maps "round_bean" to the "round_bean" bean
 

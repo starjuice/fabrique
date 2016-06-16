@@ -8,6 +8,7 @@ module Fabrique
     def initialize(registry)
       @registry = registry
       @registry.validate!
+      @gem_loader = GemLoader.new(@registry.get_gem_definitions)
       @singletons = {}
       @semaphore = Mutex.new
     end
@@ -15,6 +16,16 @@ module Fabrique
     def get_bean(bean_name)
       @semaphore.synchronize do
         get_bean_unsynchronized(bean_name)
+      end
+    end
+
+    def load_gem_dependencies
+      @gem_loader.load_gems
+    end
+
+    def to_h
+      @semaphore.synchronize do
+        @registry.get_definitions.map { |defn| [defn.id, get_bean_unsynchronized(defn.id)] }.to_h
       end
     end
 
@@ -46,8 +57,10 @@ module Fabrique
       def get_factory(defn)
         if defn.type.is_a?(BeanReference)
           get_bean_unsynchronized(defn.type.bean)
-        else
+        elsif defn.type.is_a?(Module)
           defn.type
+        else
+          Module.const_get(defn.type)
         end
       end
 

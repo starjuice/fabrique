@@ -15,12 +15,18 @@ module Fabrique
       @defs.detect { |d| d.id == bean_name }
     end
 
+    def get_definitions
+      @defs
+    end
+
+    def get_gem_definitions
+      @defs.collect(&:gem).compact
+    end
+
     def validate!
-      begin
-        tsort
-      rescue TSort::Cyclic => e
-        raise CyclicBeanDependencyError.new(e.message.gsub(/topological sort failed/, "cyclic bean dependency error"))
-      end
+      tsort
+    rescue TSort::Cyclic => e
+      raise CyclicBeanDependencyError.new(e.message.gsub(/topological sort failed/, "cyclic bean dependency error"))
     end
 
     private
