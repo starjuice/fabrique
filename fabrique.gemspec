@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Fabrique::VERSION
   spec.authors       = ["Sheldon Hearn"]
   spec.email         = ["sheldonh@starjuice.net"]
-  spec.summary       = %q{Factory support library}
-  spec.description   = %q{Factory support library for adapting existing modules for injection as dependencies}
+  spec.summary       = %q{Configuration-based factory for dependency injection}
+  spec.description   = %q{Configuration-based factory for dependency injection}
   spec.homepage      = "https://github.com/starjuice/fabrique"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 2.1"
