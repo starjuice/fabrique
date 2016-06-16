@@ -446,6 +446,26 @@ Feature: Bean Factory
     And I request the "sample" bean from the bean factory
     Then the bean has "version" set to "0.1.1"
 
+  Scenario: Gem loader with already-installed gem
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: local_only
+        class: LocalOnly
+        gem:
+          name: local_only
+          version: "= 0.1.0"
+          require: local_only
+        factory_method: itself
+      """
+    And the "local_only" gem is already installed
+    When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
+    And I request the "local_only" bean from the bean factory
+    Then the bean has "version" set to "0.1.0"
+
   Scenario: Gem loader version conflict
 
     Given I have a YAML application context definition:

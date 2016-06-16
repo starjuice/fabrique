@@ -16,6 +16,7 @@ When(/^I request a bean factory for the application context$/) do
   begin
     @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile.path)
   rescue Exception => e
+    $stderr.puts "DEBUG @bean_factory_request_exception -> #{e.inspect}\n\t#{e.backtrace.join("\n\t")}" if ENV["DEBUG"]
     @bean_factory_request_exception = e
   end
 end
@@ -87,10 +88,15 @@ Given(/^the "(.*?)" gem is not installed$/) do |gem|
   end
 end
 
+Given(/^the "([^"]*)" gem is already installed$/) do |arg1|
+  %x{ gem install --no-ri --no-rdoc fixtures/local_only-0.1.0.gem }
+end
+
 When(/^I request that bean dependency gems be loaded for the bean factory$/) do
   begin
     @bean_factory.load_gem_dependencies
   rescue Exception => e
+    $stderr.puts "DEBUG @bean_factory_load_gem_dependencies_exception -> #{e.inspect}\n\t#{e.backtrace.join("\n\t")}" if ENV["DEBUG"]
     @bean_factory_load_gem_dependencies_exception = e
   end
 end

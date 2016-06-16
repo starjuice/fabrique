@@ -4,7 +4,7 @@ module Fabrique
 
     def initialize(gem_definitions)
       @gem_defs = gem_definitions
-      deps = @gem_defs.collect(&:dependency)
+      deps = @gem_defs.collect(&:dependency).reject { |x| not x.matching_specs.empty? }
       @gem_set = Gem::RequestSet.new(*deps)
     end
 
