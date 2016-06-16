@@ -50,37 +50,46 @@ here is a code example.
 
 Given this example YAML application context definition,
 in a file called application\_context.yml:
-
+§
 ```yaml
 ---
 beans:
 - id: customer_repository
-  class: Fabrique::Test::Fixtures::Repository::CustomerRepository
+  class: Acme::Repository::CustomerRepository
   constructor_args:
     - !bean/ref store
     - !bean/ref customer_data_mapper
 - id: product_repository
-  class: Fabrique::Test::Fixtures::Repository::ProductRepository
+  class: Acme::Repository::ProductRepository
   constructor_args:
     store: !bean/ref store
     data_mapper: !bean/ref product_data_mapper
 - id: store
-  class: Fabrique::Test::Fixtures::Repository::MysqlStore
+  class: Acme::Repository::MysqlStore
   constructor_args:
     host: localhost
     port: 3306
+  gem:
+    name: acme-repository-mysql_store
+    version: "~> 1.0"
+    require: "acme/repository/mysql_store"
 - id: customer_data_mapper
-  class: Fabrique::Test::Fixtures::Repository::CustomerDataMapper
-  scope: prototype
+  class: Acme::Repository::MysqlDataMapper::Customer
+  gem:
+    name: acme-repository-mysql_data_mapper
+    require: acme/repository/mysql_data_mapper/customer
 - id: product_data_mapper
-  class: Fabrique::Test::Fixtures::Repository::ProductDataMapper
-  scope: prototype
+  class: Acme::Repository::MysqlDataMapper::Product
+  gem:
+    name: acme-repository-mysql_data_mapper
+    require: acme/repository/mysql_data_mapper/product
 ```
 
 Here is how we could materialize these dependencies:
 
 ```ruby
 bean_factory = Fabrique::YamlBeanFactory.new(File.read('application_context.yml'))
+bean_factory.load_gem_dependencies
 
 customer_service = CustomerService.new(repository: bean_factory.get_bean('customer_repository'))
 product_service = ProductService.new(repository: bean_factory.get_bean('product_repository'))
@@ -90,7 +99,15 @@ store_service = StoreService.new(customers: customer_service, products: product_
 
 Of course, the construction of these services could just as well have been handled by the
 bean factory as well. Where to draw the line is an interesting topic. The example above draws it
-"at dependencies of everything but main".
+"at dependencies that could be expected to vary per deployment".
+
+Notice that gems were only specified for the parts of the context that could be expected to
+vary per deployment; the gem providing Acme::Repository::CustomerRepository and
+Acme::Repository::ProductRepository would be bundled with the application.
+
+Also notice that the gem loader is activated by an explicit call to load\_gem\_dependencies.
+Runtime installation and activation of gems is controversial, and so it must be requested
+explicitly.
 
 For a data-centric approach to IoC, the entire set of beans can be materialized as a dictionary
 and made available to consumer to cherry-pick what they need without any awareness of the use
@@ -98,6 +115,8 @@ of a BeanFactory:
 
 ```ruby
 bean_factory = Fabrique::YamlBeanFactory.new('application_context.yml')
+bean_factory.load_gem_dependencies
+
 # Symbolize keys for use as keyword arguments:
 context = bean_factory.to_h.map { |k, v| [k.intern, v] }.to_h
 
