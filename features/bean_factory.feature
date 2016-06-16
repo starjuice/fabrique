@@ -466,6 +466,38 @@ Feature: Bean Factory
     And I request the "local_only" bean from the bean factory
     Then the bean has "version" set to "0.1.0"
 
+  Scenario: Gem loader with duplicate gem
+
+    Given I have a YAML application context definition:
+      """
+      ---
+      beans:
+      - id: sampler
+        class: Fabrique::DataBean
+        constructor_args:
+        - sample1_version: !bean/property_ref sample1.version
+          sample2_version: !bean/property_ref sample2.version
+      - id: sample1
+        class: Sample
+        gem:
+          name: sample
+          version: "= 0.1.1"
+          require: sample
+        factory_method: itself
+      - id: sample2
+        class: Sample
+        gem:
+          name: sample
+          require: sample
+        factory_method: itself
+      """
+    And the "sample" gem is not installed
+    When I request a bean factory for the application context
+    And I request that bean dependency gems be loaded for the bean factory
+    And I request the "sampler" bean from the bean factory
+    Then the bean has "sample1_version" set to "0.1.1"
+    And the bean has "sample2_version" set to "0.1.1"
+
   Scenario: Gem loader version conflict
 
     Given I have a YAML application context definition:
