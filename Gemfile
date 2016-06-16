@@ -8,6 +8,6 @@ group :development, :test do
 end
 
 group :devtools do
-  gem "guard-cucumber", "~> 1.6"
-  gem "byebug", "~> 6.0"
+  gem "guard-cucumber", "~> 2.1"
+  gem "byebug", "~> 9.0"
 end
