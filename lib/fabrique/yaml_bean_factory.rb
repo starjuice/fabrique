@@ -26,7 +26,7 @@ module Fabrique
   class YamlBeanFactory < BeanFactory
 
     def initialize(path_or_string)
-      super bean_definition_registry beans_node load_yaml path_or_string
+      super beans_node load_yaml path_or_string
     end
 
     private
@@ -48,13 +48,9 @@ module Fabrique
     end
 
     def bean_definition_registry(beans)
-      if beans.is_a?(BeanDefinitionRegistry)
-        beans
-      elsif beans.is_a?(Array)
-        BeanDefinitionRegistry.new(beans)
-      else
-        raise "YAML top-level beans node must be an Array or a #{BeanDefinitionRegistry}"
-      end
+      super
+    rescue BeanDefinitionRegistry
+      raise "YAML top-level beans node must be an Array or a #{BeanDefinitionRegistry}"
     end
 
   end

@@ -15,7 +15,7 @@ Feature: Bean Factory
         id: simple_object
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "default size"
     And the bean has "color" set to "default color"
@@ -34,7 +34,7 @@ Feature: Bean Factory
             - red
             - dot
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "small"
     And the bean has "color" set to "red"
@@ -53,7 +53,7 @@ Feature: Bean Factory
           color: black
           shape: hole
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "large"
     And the bean has "color" set to "black"
@@ -73,7 +73,7 @@ Feature: Bean Factory
           color: purple
           shape: elephant
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "tiny"
     And the bean has "color" set to "purple"
@@ -91,7 +91,7 @@ Feature: Bean Factory
         class: !bean/ref factory
         factory_method: create
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "created_object" bean from the bean factory
     Then the bean has "size" set to "factory size"
     And the bean has "color" set to "factory color"
@@ -107,7 +107,7 @@ Feature: Bean Factory
         class: Fabrique::Test::Fixtures::Modules::ModuleWithStaticMethods
         factory_method: itself
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "my_module" bean from the bean factory
     Then the bean has "size" set to "module size"
     And the bean has "color" set to "module color"
@@ -141,7 +141,7 @@ Feature: Bean Factory
         class: Fabrique::Test::Fixtures::Repository::ProductDataMapper
         scope: prototype
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     Then the "customer_repository" and "product_repository" beans share the same "store"
     And the "customer_repository" and "product_repository" beans each have their own "data_mapper"
 
@@ -160,7 +160,7 @@ Feature: Bean Factory
         properties:
           shape: !bean/ref left
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean constructor arg reference
@@ -182,7 +182,7 @@ Feature: Bean Factory
           - purple
           - elephant
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean property reference with non-cyclic constructor arg reference
@@ -204,7 +204,7 @@ Feature: Bean Factory
         properties:
           shape: !bean/ref left
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     Then I get a cyclic bean dependency error
 
   Scenario: Cyclic bean class reference
@@ -221,7 +221,7 @@ Feature: Bean Factory
         class: !bean/ref factory
         factory_method: create
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     Then I get a cyclic bean dependency error
 
   Scenario: Nested bean references
@@ -241,7 +241,7 @@ Feature: Bean Factory
         constructor_args:
           - [[0, 0, 0],[1, 0, 0],[1, 0, 1],[0, 0, 1],[0, 1, 0],[1, 1, 0],[1, 1, 1],[0, 1, 1]]
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "disco_cube" bean from the bean factory
     Then the "disco_cube" bean has "mesh" set to the "cube_mesh" bean
     And the "disco_cube" bean has "scale" that is the Integer 10
@@ -264,7 +264,7 @@ Feature: Bean Factory
               - invisible
               - elephant
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "outer" bean from the bean factory
     Then the bean's "shape" is an object with "shape" set to "elephant"
 
@@ -287,7 +287,7 @@ Feature: Bean Factory
           - purple
           - elephant
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "left" bean from the bean factory
     Then the bean has "size" set to "tiny"
     And the bean has "color" set to "purple"
@@ -316,7 +316,7 @@ Feature: Bean Factory
           - purple
           - elephant
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "left" bean from the bean factory
     Then the bean has "size" set to "tiny"
     And the bean has "color" set to "purple"
@@ -332,7 +332,7 @@ Feature: Bean Factory
         scope: singleton
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then I get the same object when I request the "simple_object" bean again
 
@@ -346,7 +346,7 @@ Feature: Bean Factory
         scope: prototype
         class: Fabrique::Test::Fixtures::Constructors::ClassWithDefaultConstructor
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then I get a different object when I request the "simple_object" bean again
 
@@ -363,7 +363,7 @@ Feature: Bean Factory
           color: blue
           shape: square
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "large"
     And the bean has "color" set to "blue"
@@ -382,7 +382,7 @@ Feature: Bean Factory
           - invisible
           - 42
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "infinite"
     And the bean has "color" set to "invisible"
@@ -401,7 +401,7 @@ Feature: Bean Factory
           color: invisible
           shape: 42
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "simple_object" bean from the bean factory
     Then the bean has "size" set to "infinite"
     And the bean has "color" set to "invisible"
@@ -420,7 +420,7 @@ Feature: Bean Factory
           color: red
           shape: dot
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request the "data" bean from the bean factory
     Then the bean has "size" set to "small"
     And the bean has "color" set to "red"
@@ -441,7 +441,7 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "sample" gem is not installed
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request that bean dependency gems be loaded for the bean factory
     And I request the "sample" bean from the bean factory
     Then the bean has "version" set to "0.1.1"
@@ -461,7 +461,7 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "local_only" gem is already installed
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request that bean dependency gems be loaded for the bean factory
     And I request the "local_only" bean from the bean factory
     Then the bean has "version" set to "0.1.0"
@@ -492,7 +492,7 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "sample" gem is not installed
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request that bean dependency gems be loaded for the bean factory
     And I request the "sampler" bean from the bean factory
     Then the bean has "sample1_version" set to "0.1.1"
@@ -520,7 +520,7 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "sample" gem is not installed
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request that bean dependency gems be loaded for the bean factory
     Then I get a gem dependency error
 
@@ -537,7 +537,7 @@ Feature: Bean Factory
         factory_method: itself
       """
     And the "sample" gem is not installed
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request that bean dependency gems be loaded for the bean factory
     Then I get a gem dependency error
 
@@ -558,7 +558,7 @@ Feature: Bean Factory
         constructor_args:
           shape: round
       """
-    When I request a bean factory for the application context
+    When I request a bean factory for the YAML application context
     And I request a dictionary of all beans
     Then the dictionary maps "square_bean" to the "square_bean" bean
     And the dictionary maps "round_bean" to the "round_bean" bean

@@ -5,8 +5,8 @@ module Fabrique
   class BeanFactory
     attr_reader :registry, :singletons
 
-    def initialize(registry)
-      @registry = registry
+    def initialize(beans)
+      @registry = bean_definition_registry beans
       @registry.validate!
       @gem_loader = GemLoader.new(@registry.get_gem_definitions)
       @singletons = {}
@@ -30,6 +30,16 @@ module Fabrique
     end
 
     private
+
+      def bean_definition_registry(beans)
+        if beans.is_a?(BeanDefinitionRegistry)
+          beans
+        elsif beans.is_a?(Array)
+          BeanDefinitionRegistry.new(beans)
+        else
+          raise BeanDefinitionError, "Bean definition registry must be an Array or a #{BeanDefinitionRegistry}"
+        end
+      end
 
       def get_bean_unsynchronized(bean_name)
         defn = @registry.get_definition(bean_name)

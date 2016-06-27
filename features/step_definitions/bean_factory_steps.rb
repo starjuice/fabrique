@@ -12,7 +12,7 @@ Given(/^I have a YAML application context definition:$/) do |string|
   @tmpfile.close
 end
 
-When(/^I request a bean factory for the application context$/) do
+When(/^I request a bean factory for the YAML application context$/) do
   begin
     @bean_factory = Fabrique::YamlBeanFactory.new(@tmpfile.path)
   rescue Exception => e
