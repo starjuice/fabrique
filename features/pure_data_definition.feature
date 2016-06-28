@@ -14,7 +14,7 @@ Feature: Pure data definition
       - id: factory
         class: Fabrique::Test::Fixtures::Constructors::FactoryWithCreateMethod
       - id: created_object
-        class: {bean/ref: factory}
+        class: {"!bean/ref": factory}
         factory_method: create
       """
     When I request a bean factory for the plain data application context
@@ -32,13 +32,13 @@ Feature: Pure data definition
       - id: customer_repository
         class: Fabrique::Test::Fixtures::Repository::CustomerRepository
         constructor_args:
-          - {bean/ref: store}
-          - {bean/ref: customer_data_mapper}
+          - {"!bean/ref": store}
+          - {"!bean/ref": customer_data_mapper}
       - id: product_repository
         class: Fabrique::Test::Fixtures::Repository::ProductRepository
         constructor_args:
-          store: {bean/ref: store}
-          data_mapper: {bean/ref: product_data_mapper}
+          store: {"!bean/ref": store}
+          data_mapper: {"!bean/ref": product_data_mapper}
       - id: store
         class: Fabrique::Test::Fixtures::Repository::MysqlStore
         constructor_args:
@@ -64,11 +64,11 @@ Feature: Pure data definition
       - id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
-          shape: {bean/ref: right}
+          shape: {"!bean/ref": right}
       - id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
         properties:
-          shape: {bean/ref: left}
+          shape: {"!bean/ref": left}
       """
     When I request a bean factory for the plain data application context
     Then I get a cyclic bean dependency error
@@ -82,38 +82,92 @@ Feature: Pure data definition
       - id: left
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
-          - {bean/ref: right}
+          - {"!bean/ref": right}
           - red
           - dot
       - id: right
         class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
-          - {bean/ref: left}
+          - {"!bean/ref": left}
           - purple
           - elephant
       """
     When I request a bean factory for the plain data application context
     Then I get a cyclic bean dependency error
 
-  Scenario: Nested bean references
+  Scenario: Inner bean
 
     Given I have a plain data application context definition:
       """
       ---
       beans:
-      - id: disco_cube
-        class: Fabrique::Test::Fixtures::OpenGL::Object
+      - id: outer
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
         constructor_args:
-          - glittering
-          - :mesh: {bean/ref: cube_mesh}
-            :scale: 10
-      - id: cube_mesh
-        class: Fabrique::Test::Fixtures::OpenGL::Mesh
-        constructor_args:
-          - [[0, 0, 0],[1, 0, 0],[1, 0, 1],[0, 0, 1],[0, 1, 0],[1, 1, 0],[1, 1, 1],[0, 1, 1]]
+          - large
+          - red
+          - "!bean":
+              class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+              constructor_args:
+                - infinite
+                - invisible
+                - elephant
       """
     When I request a bean factory for the plain data application context
-    And I request the "disco_cube" bean from the bean factory
-    Then the "disco_cube" bean has "mesh" set to the "cube_mesh" bean
-    And the "disco_cube" bean has "scale" that is the Integer 10
+    And I request the "outer" bean from the bean factory
+    Then the bean's "shape" is an object with "shape" set to "elephant"
+
+  Scenario: Bean property reference
+
+    Given I have a plain data application context definition:
+      """
+      ---
+      beans:
+      - id: left
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - {"!bean/property_ref": right.size}
+          - {"!bean/property_ref": right.color}
+          - {"!bean/property_ref": right.shape}
+      - id: right
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - tiny
+          - purple
+          - elephant
+      """
+    When I request a bean factory for the plain data application context
+    And I request the "left" bean from the bean factory
+    Then the bean has "size" set to "tiny"
+    And the bean has "color" set to "purple"
+    And the bean has "shape" set to "elephant"
+
+  Scenario: Nested bean property reference
+
+    Given I have a plain data application context definition:
+      """
+      ---
+      beans:
+      - id: left
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - {"!bean/property_ref": middle.object.size}
+          - {"!bean/property_ref": middle.object.color}
+          - {"!bean/property_ref": middle.object.shape}
+      - id: middle
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithProperties
+        properties:
+          object: {"!bean/ref": right}
+      - id: right
+        class: Fabrique::Test::Fixtures::Constructors::ClassWithPositionalArgumentConstructor
+        constructor_args:
+          - tiny
+          - purple
+          - elephant
+      """
+    When I request a bean factory for the plain data application context
+    And I request the "left" bean from the bean factory
+    Then the bean has "size" set to "tiny"
+    And the bean has "color" set to "purple"
+    And the bean has "shape" set to "elephant"
 

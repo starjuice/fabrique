@@ -26,7 +26,7 @@ module Fabrique
   class YamlBeanFactory < BeanFactory
 
     def initialize(path_or_string)
-      super beans_node load_yaml path_or_string
+      super load_yaml path_or_string
     end
 
     private
@@ -37,20 +37,6 @@ module Fabrique
       else
         YAML.load_file(path_or_string)
       end
-    end
-
-    def beans_node(parsed_yaml)
-      if parsed_yaml.respond_to?(:keys) and parsed_yaml["beans"]
-        parsed_yaml["beans"]
-      else
-        raise "YAML contains no top-level beans node"
-      end
-    end
-
-    def bean_definition_registry(beans)
-      super
-    rescue BeanDefinitionRegistry
-      raise "YAML top-level beans node must be an Array or a #{BeanDefinitionRegistry}"
     end
 
   end

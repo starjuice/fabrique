@@ -1,5 +1,5 @@
 Given(/^I have a plain data application context definition:$/) do |string|
-  @context_definition = YAML.safe_load(string, [Symbol])["beans"]
+  @context_definition = YAML.safe_load(string, [Symbol])
 end
 
 When(/^I request a bean factory for the plain data application context$/) do
