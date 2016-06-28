@@ -20,7 +20,6 @@ module Fabrique
       elsif beans.is_a?(Array)
         BeanDefinitionRegistry.new(beans)
       else
-        # TODO clean up error message
         raise BeanDefinitionError, "Beans must be an Array or a BeanDefinitionRegistry"
       end
     end

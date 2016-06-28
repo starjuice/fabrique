@@ -5,7 +5,6 @@ module Fabrique
 
     def initialize(attrs = {})
       @id = attrs["id"]
-      # TODO refactor: push down and validate
       @type = attrs["class"]
       @gem = GemDefinition.new(attrs["gem"]) if attrs["gem"]
       @constructor_args = attrs["constructor_args"] || []
