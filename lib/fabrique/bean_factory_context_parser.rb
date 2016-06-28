@@ -20,7 +20,7 @@ module Fabrique
       elsif beans.is_a?(Array)
         BeanDefinitionRegistry.new(beans)
       else
-        raise BeanDefinitionError, "Beans must be an Array or a BeanDefinitionRegistry"
+        raise "Beans must be an Array or a BeanDefinitionRegistry"
       end
     end
 
