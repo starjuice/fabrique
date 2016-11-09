@@ -50,7 +50,7 @@ here is a code example.
 
 Given this example YAML application context definition,
 in a file called application\_context.yml:
-§
+
 ```yaml
 ---
 beans:
