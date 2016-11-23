@@ -1,6 +1,7 @@
 require "tsort"
 require_relative "bean_definition"
 require_relative "cyclic_bean_dependency_error"
+require_relative "missing_bean_error"
 
 module Fabrique
 
@@ -12,7 +13,7 @@ module Fabrique
     end
 
     def get_definition(bean_name)
-      @defs.detect { |d| d.id == bean_name }
+      @defs.detect { |d| d.id == bean_name } or raise MissingBeanError.new("missing bean #{bean_name.inspect}")
     end
 
     def get_definitions
