@@ -16,8 +16,8 @@ module Fabrique
         spec.activate
       end
       @gem_defs.collect(&:required_as).each { |x| require x }
-    rescue Gem::DependencyError => e
-      raise GemDependencyError.new(e.message)
+    rescue Gem::DependencyResolutionError, Gem::UnsatisfiableDependencyError => e
+      raise Fabrique::GemDependencyError.new(e.message)
     end
 
   end

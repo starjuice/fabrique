@@ -84,7 +84,7 @@ Given(/^the "(.*?)" gem is not installed$/) do |gem|
   dep = Gem::Dependency.new(gem, Gem::Requirement.default)
   specs = dep.matching_specs
   specs.each do |spec|
-    Gem::Uninstaller.new(spec).uninstall
+    Gem::Uninstaller.new(spec.name).uninstall
   end
 end
 
